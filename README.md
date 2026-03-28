@@ -68,22 +68,114 @@ Optional (only needed for real API mode):
 
 ## Setup & Installation
 
+### Step 1 — Install Node.js 18+
+
 ```bash
-# 1. Clone the repo
+node --version   # must print v18.x.x or higher
+```
+
+If you need to install or upgrade:
+
+**macOS**
+```bash
+brew install node
+```
+
+**Ubuntu / Debian**
+```bash
+# via nvm (recommended — avoids sudo and version conflicts)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+source ~/.bashrc   # or restart your terminal
+nvm install 18
+nvm use 18
+```
+
+**Windows** — download the LTS installer from [nodejs.org](https://nodejs.org).
+
+---
+
+### Step 2 — Clone the repository
+
+```bash
 git clone https://github.com/your-org/indyhack2026-project.git
 cd indyhack2026-project
+```
 
-# 2. Install dependencies
+---
+
+### Step 3 — Install dependencies
+
+```bash
 npm install
+```
 
-# 3. Create your local environment file
+Takes 30–60 seconds. If you hit peer dependency errors, run:
+
+```bash
+npm install --legacy-peer-deps
+```
+
+---
+
+### Step 4 — Create the environment file
+
+```bash
 cp .env.example .env.local
+```
 
-# 4. Start the development server
+The default file already contains `MOCK_MODE=true`. No API keys are needed to run the full demo.
+
+---
+
+### Step 5 — Start the server
+
+**Development (with hot reload):**
+```bash
 npm run dev
 ```
 
+**Production build (faster, closer to a real deployment):**
+```bash
+npm run build
+npm start
+```
+
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+If port 3000 is already in use:
+```bash
+npm run dev -- -p 3001
+```
+
+---
+
+### Step 6 — Verify everything is working
+
+Hit these URLs in order:
+
+| URL | What you should see |
+|-----|---------------------|
+| `/` | Landing page — hero, features, sponsor logos |
+| `/demo` | 9-step demo runner — press the big button |
+| `/dashboard` | Event overview with stat cards and AI alerts |
+| `/dashboard/planner` | Chat interface; type anything to get a plan |
+| `/dashboard/vendors` | Vendor cards with relevance scores |
+| `/dashboard/budget` | Recharts budget charts + AI recommendations |
+| `/dashboard/tickets` | Wallet connect → Mint NFT → QR code |
+| `/dashboard/voice` | Click a sample question to hear the concierge |
+| `/event/rustic-networking-sept-2025` | Public guest event microsite |
+
+---
+
+### Troubleshooting
+
+| Problem | Fix |
+|---------|-----|
+| `npm install` fails with peer dependency errors | `npm install --legacy-peer-deps` |
+| Port 3000 already in use | `npm run dev -- -p 3001` |
+| `node: command not found` | Node isn't installed or isn't on PATH — see Step 1 |
+| Blank page or hydration error | Make sure `.env.local` exists: `cp .env.example .env.local` |
+| Voice concierge is silent | Check browser microphone permissions; mock mode uses browser TTS |
 
 ---
 
