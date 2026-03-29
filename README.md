@@ -10,36 +10,31 @@ An organizer speaks: _"I want a rustic outdoor networking event for 200 people i
 
 ## Table of Contents
 
-1. [Project Overview](#project-overview)
-2. [Prerequisites](#prerequisites)
-3. [Setup & Installation](#setup--installation)
-4. [Running in Mock Mode (no credentials)](#running-in-mock-mode-no-credentials)
-5. [Connecting Real APIs](#connecting-real-apis)
+[Project Overview](#project-overview)
+[Prerequisites](#prerequisites)
+[Setup & Installation](#setup--installation)
+[Connecting Real APIs](#connecting-real-apis)
    - [Gemini](#gemini)
    - [MongoDB Atlas](#mongodb-atlas)
    - [Solana](#solana)
    - [ElevenLabs](#elevenlabs)
-6. [How to Demo in 3 Minutes](#how-to-demo-in-3-minutes)
-7. [Project Structure](#project-structure)
-8. [Architecture](#architecture)
-9. [Pages & Routes](#pages--routes)
-10. [Sponsor Integration Points](#sponsor-integration-points)
-11. [Data Models](#data-models)
-12. [Tech Stack](#tech-stack)
-13. [Why This Wins](#why-this-wins)
+[Project Structure](#project-structure)
+[Architecture](#architecture)
+[Pages & Routes](#pages--routes)
+[Data Models](#data-models)
+[Tech Stack](#tech-stack)
 
 ---
 
 ## Project Overview
 
-| | |
-|---|---|
-| **App name** | Com-Plan-ion |
-| **Hackathon** | IndyHack 2026 |
-| **Node version** | 18+ |
-| **Framework** | Next.js 14 (App Router) |
-| **Language** | TypeScript |
-| **Mock mode** | Fully functional with zero API keys |
+
+**App name**: Com-Plan-ion 
+**Hackathon**: IndyHack 2026 
+**Node version**: 18+ 
+**Framework**: Next.js 14 (App Router)
+**Language**: TypeScript 
+**Mock mode**: Fully functional with zero API keys 
 
 The core demo scenario:
 
@@ -57,8 +52,6 @@ The core demo scenario:
 
 - **Node.js 18+** and **npm 9+**
 - Git
-
-Optional (only needed for real API mode):
 - A [Google AI Studio](https://aistudio.google.com) account (Gemini API key)
 - A [MongoDB Atlas](https://cloud.mongodb.com) cluster with Vector Search enabled
 - A [Solana CLI](https://docs.solana.com/cli/install-solana-cli-tools) keypair (devnet)
@@ -146,58 +139,6 @@ If port 3000 is already in use:
 ```bash
 npm run dev -- -p 3001
 ```
-
----
-
-### Step 6 — Verify everything is working
-
-Hit these URLs in order:
-
-| URL | What you should see |
-|-----|---------------------|
-| `/` | Landing page — hero, features, sponsor logos |
-| `/demo` | 9-step demo runner — press the big button |
-| `/dashboard` | Event overview with stat cards and AI alerts |
-| `/dashboard/planner` | Chat interface; type anything to get a plan |
-| `/dashboard/vendors` | Vendor cards with relevance scores |
-| `/dashboard/budget` | Recharts budget charts + AI recommendations |
-| `/dashboard/tickets` | Wallet connect → Mint NFT → QR code |
-| `/dashboard/voice` | Click a sample question to hear the concierge |
-| `/event/rustic-networking-sept-2025` | Public guest event microsite |
-
----
-
-### Troubleshooting
-
-| Problem | Fix |
-|---------|-----|
-| `npm install` fails with peer dependency errors | `npm install --legacy-peer-deps` |
-| Port 3000 already in use | `npm run dev -- -p 3001` |
-| `node: command not found` | Node isn't installed or isn't on PATH — see Step 1 |
-| Blank page or hydration error | Make sure `.env.local` exists: `cp .env.example .env.local` |
-| Voice concierge is silent | Check browser microphone permissions; mock mode uses browser TTS |
-
----
-
-## Running in Mock Mode (no credentials)
-
-The default `.env.local` ships with `MOCK_MODE=true`. In this mode:
-
-- All Gemini calls return pre-built realistic event plans
-- Vendor search uses a keyword-weighted scoring algorithm over 15 seeded vendors
-- Solana ticket minting generates a valid-looking devnet address and transaction signature
-- ElevenLabs TTS falls back to the browser's built-in Web Speech API
-- MongoDB returns data from `src/lib/data/*.ts` — no Atlas connection needed
-
-**The entire app runs and demos perfectly offline.**
-
-To verify mock mode is active, check that `.env.local` contains:
-
-```env
-MOCK_MODE=true
-```
-
-No other variables are needed.
 
 ---
 
@@ -324,33 +265,6 @@ Relevant file: `src/lib/services/elevenlabs.ts`
 3. Press the **"Run Hackathon Demo"** button
 4. The app auto-progresses through 9 steps with animations — narrate along
 
-**What the demo shows:**
-
-| Step | What happens | Sponsor |
-|------|-------------|---------|
-| 1 | Organizer types event description (auto-typed) | — |
-| 2 | Gemini generates a full structured event plan | Gemini |
-| 3 | MongoDB vector search returns 8 vendor matches with AI reasoning | MongoDB |
-| 4 | Conflict detection: 2 issues flagged (deposit timing + budget risk) | Gemini |
-| 5 | Budget intelligence dashboard renders with charts | MongoDB |
-| 6 | Solana NFT ticket mints in ~2s with QR code | Solana |
-| 7 | Public guest event microsite is shown | — |
-| 8 | ElevenLabs concierge answers "Where do I park?" out loud | ElevenLabs |
-| 9 | Demo complete — all pages available for exploration | — |
-
-### Manual exploration (after demo)
-
-Point judges to these pages in order:
-
-```
-/dashboard/planner  → Type anything; see Gemini plan + conflict panel
-/dashboard/vendors  → Try "cozy Italian catering under $40/head" — see vector search
-/dashboard/budget   → Recharts analytics + AI "what-if" analysis
-/dashboard/tickets  → Click "Connect Wallet" → "Mint NFT Ticket" → see QR code
-/dashboard/voice    → Click a sample question; hear the voice concierge respond
-/event/rustic-networking-sept-2025 → Public guest page with embedded concierge
-```
-
 ---
 
 ## Project Structure
@@ -468,66 +382,6 @@ indyhack2026-project/
 
 ---
 
-## Sponsor Integration Points
-
-### Gemini (Google AI)
-
-| | |
-|---|---|
-| **File** | `src/lib/services/gemini.ts` |
-| **API route** | `POST /api/gemini` |
-| **Pages** | AI Planner |
-| **Models** | `gemini-1.5-pro`, `text-embedding-004` |
-
-- Natural language → structured `EventPlan` JSON (theme, schedule, vendors, budget, risks)
-- Multi-turn chat with persistent event context loaded from MongoDB
-- Conflict detection: deposits, budget overruns, RSVP timing, accessibility gaps
-- Generates next-action checklists after every response
-
-### MongoDB Atlas
-
-| | |
-|---|---|
-| **File** | `src/lib/services/mongodb.ts` |
-| **API route** | `GET /api/vendors` |
-| **Pages** | Vendors, AI Planner, Operations |
-
-- **Vector Search** — `$vectorSearch` on `vendors.embeddingVector` (768-dim, cosine similarity)
-- **Persistent AI Memory** — `eventMemory` collection stores every planning decision and preference; loaded into Gemini context on every chat turn
-- **Change Streams** — Operations page architecture supports `db.collection.watch()` for real-time milestone updates (simulated in demo mode)
-- **Aggregations** — Budget analytics use `$group` / `$sum` pipelines
-
-### Solana
-
-| | |
-|---|---|
-| **File** | `src/lib/services/solana.ts` |
-| **API route** | `POST /api/tickets/mint` |
-| **Pages** | Tickets |
-| **Network** | Devnet |
-
-- Compressed NFT (cNFT) tickets via Metaplex Bubblegum program
-- Ticket metadata: attendee name, access tier, meal preference, perks array, proof-of-attendance flag
-- QR code encodes mint address linked to a `/verify/:mintAddress` endpoint
-- Solana Pay escrow architecture for milestone-based vendor payments
-- Token-gating: previous-event NFT holders unlock loyalty perks (priority RSVP, seating upgrades)
-
-### ElevenLabs
-
-| | |
-|---|---|
-| **File** | `src/lib/services/elevenlabs.ts` |
-| **API route** | `POST /api/voice` |
-| **Pages** | Voice Concierge, Event guest page |
-| **Model** | `eleven_turbo_v2` |
-
-- Context-aware answers pulled from live event data (not a generic chatbot)
-- Organizer voice cloning via ElevenLabs Voice Lab — guests hear the concierge in the organizer's voice
-- All concierge sessions logged to MongoDB `voiceLogs` collection
-- Mock mode uses browser Web Speech API — works fully offline
-
----
-
 ## Data Models
 
 All models are defined as Zod schemas in `src/lib/schemas/index.ts` and used identically in mock data and real Atlas collections.
@@ -568,16 +422,5 @@ All models are defined as Zod schemas in `src/lib/schemas/index.ts` and used ide
 
 ---
 
-## Why This Wins
-
-| Sponsor | What we do | Why it's strong |
-|---------|-----------|----------------|
-| **Gemini** | Structured plan generation, multi-turn planning chat, conflict detection, persistent AI memory | Not just Q&A — Gemini produces typed JSON that drives real UI. Memory persists across sessions via MongoDB. |
-| **MongoDB** | Atlas Vector Search for semantic vendor matching, persistent event memory, change stream–driven ops updates | Vector search is _functional_ with real embedding schema. Not a CRUD demo. |
-| **Solana** | Compressed NFT tickets with rich metadata, QR code verification, Solana Pay vendor escrow, loyalty token-gating | Tickets have _utility_ — meal preference, access tier, perks, POAP. Escrow is a real product feature for vendor trust. |
-| **ElevenLabs** | Event-aware voice concierge, organizer voice cloning, browser TTS fallback, session logging | Concierge answers from _live event data_ (schedule, parking, meals). Organizer voice makes it personal. |
-| **Product** | One coherent end-to-end flow covering planning, vendors, budgets, tickets, and guest experience | Every feature connects to every other. The demo tells a story, not a checklist. |
-
----
 
 *Built for IndyHack 2026 · Node 18 · Next.js 14 · MOCK_MODE=true runs everything offline*
