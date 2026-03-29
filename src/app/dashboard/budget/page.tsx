@@ -5,6 +5,7 @@ import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer, Area, AreaChart,
 } from "recharts";
+import type React from "react";
 import {
   DollarSign, AlertTriangle, TrendingUp, CheckCircle2,
   Lightbulb, Info,
@@ -13,21 +14,66 @@ import { useEventStore } from "@/lib/store/eventStore";
 import { formatCurrency, cn } from "@/lib/utils";
 import { CATEGORY_COLORS } from "@/lib/data/budgets";
 
-const AI_RECOMMENDATIONS = [
-  { icon: AlertTriangle, colorClass: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 border-rose-100 dark:bg-rose-900/20 dark:border-rose-800/40", title: "Contingency too low", body: "Current contingency is $300 (3.75%). Reduce decor from $950 to $550 to create a $700 buffer.", impact: "-$400 decor, +$400 contingency" },
-  { icon: Lightbulb, colorClass: "text-brand-600 dark:text-brand-400", bg: "bg-brand-50 border-brand-100 dark:bg-brand-900/20 dark:border-brand-800/40", title: "If you swap to Solstice Market Collective", body: "Solstice Market at $28/head saves $2,000 for 200 guests. Still vegetarian-forward.", impact: "-$2,000 catering" },
-  { icon: TrendingUp, colorClass: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800/40", title: "RSVP growth may push catering over", body: "At current RSVP velocity, you will hit 185-200 guests. Budget for 210 to give caterer notice.", impact: "+$760 catering (contingent)" },
-  { icon: Info, colorClass: "text-muted-foreground", bg: "bg-muted border-border", title: "Photography deposit due Sep 13", body: "Golden Hour Studios balance of $1,800 due September 13th. Mark as paid in operations.", impact: "$1,800 due in 46 days" },
-];
+// Recommendations are generated dynamically in the component based on actual data
 
 export default function BudgetPage() {
-  const { budgetItems, event } = useEventStore();
+  const { budgetItems, event, guests } = useEventStore();
 
   const totalBudget = event.budget;
   const projectedSpend = budgetItems.reduce((s, b) => s + b.projected, 0);
   const actualSpend = budgetItems.reduce((s, b) => s + b.actual, 0);
   const remaining = totalBudget - projectedSpend;
-  const budgetPct = Math.round((projectedSpend / totalBudget) * 100);
+  const budgetPct = totalBudget > 0 ? Math.round((projectedSpend / totalBudget) * 100) : 0;
+  const contingencyPct = totalBudget > 0 ? Math.round((remaining / totalBudget) * 100) : 100;
+  const confirmedGuests = guests.filter((g) => g.rsvpStatus === "confirmed").length;
+
+  // Data-driven AI recommendations
+  const AI_RECOMMENDATIONS = [
+    contingencyPct < 10 && totalBudget > 0 && {
+      icon: AlertTriangle,
+      colorClass: "text-rose-600 dark:text-rose-400",
+      bg: "bg-rose-50 border-rose-100 dark:bg-rose-900/20 dark:border-rose-800/40",
+      title: "Contingency buffer is too low",
+      body: `Current buffer is ${formatCurrency(remaining)} (${contingencyPct}% of budget). Industry standard is 10–15%. Consider trimming lower-priority line items to free up at least ${formatCurrency(Math.round(totalBudget * 0.1))} in reserve.`,
+      impact: `Target: ${formatCurrency(Math.round(totalBudget * 0.1))} buffer`,
+    },
+    event.guestCount > 0 && confirmedGuests > event.guestCount * 0.75 && {
+      icon: TrendingUp,
+      colorClass: "text-amber-600 dark:text-amber-400",
+      bg: "bg-amber-50 border-amber-100 dark:bg-amber-900/20 dark:border-amber-800/40",
+      title: "High RSVP rate — prepare for overflow",
+      body: `${confirmedGuests} of ${event.guestCount} guests confirmed (${Math.round((confirmedGuests / event.guestCount) * 100)}%). At this rate you may exceed capacity. Alert your caterer and staffing vendors.`,
+      impact: `${event.guestCount - confirmedGuests} spots remaining`,
+    },
+    budgetItems.filter((b) => b.isPaid).length > 0 && {
+      icon: CheckCircle2,
+      colorClass: "text-emerald-600 dark:text-emerald-400",
+      bg: "bg-emerald-50 border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800/40",
+      title: `${budgetItems.filter((b) => b.isPaid).length} line item${budgetItems.filter((b) => b.isPaid).length > 1 ? "s" : ""} paid`,
+      body: `${formatCurrency(budgetItems.filter((b) => b.isPaid).reduce((s, b) => s + b.actual, 0))} in confirmed payments. ${budgetItems.filter((b) => !b.isPaid).length} item${budgetItems.filter((b) => !b.isPaid).length !== 1 ? "s" : ""} still pending.`,
+      impact: `${formatCurrency(projectedSpend - actualSpend)} still committed but unpaid`,
+    },
+    budgetItems.filter((b) => b.dueDate && !b.isPaid).length > 0 && {
+      icon: Info,
+      colorClass: "text-muted-foreground",
+      bg: "bg-muted border-border",
+      title: "Upcoming payments need attention",
+      body: budgetItems
+        .filter((b) => b.dueDate && !b.isPaid)
+        .slice(0, 2)
+        .map((b) => `${b.label}: ${formatCurrency(b.projected)} due ${b.dueDate}`)
+        .join(" · "),
+      impact: `${budgetItems.filter((b) => b.dueDate && !b.isPaid).length} payment${budgetItems.filter((b) => b.dueDate && !b.isPaid).length > 1 ? "s" : ""} scheduled`,
+    },
+    budgetItems.length === 0 && {
+      icon: Lightbulb,
+      colorClass: "text-brand-600 dark:text-brand-400",
+      bg: "bg-brand-50 border-brand-100 dark:bg-brand-900/20 dark:border-brand-800/40",
+      title: "No budget items yet",
+      body: "Use the AI Planner to generate a full event plan — it will populate your budget breakdown automatically.",
+      impact: "Generate a plan to unlock",
+    },
+  ].filter(Boolean) as { icon: React.ElementType; colorClass: string; bg: string; title: string; body: string; impact: string }[];
 
   const categoryTotals = budgetItems.reduce((acc, item) => {
     acc[item.category] = (acc[item.category] || 0) + item.projected;

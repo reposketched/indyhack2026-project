@@ -1,5 +1,6 @@
 "use client";
 
+import type React from "react";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
@@ -267,7 +268,8 @@ export default function EventGuestPage() {
             event.guestCount > 0 ? { icon: Users, label: "Guests", value: `${event.guestCount} expected` } : null,
             hasLocation ? { icon: MapPin, label: "Venue", value: event.location.name || event.location.city } : null,
             event.location.parkingInfo ? { icon: Car, label: "Parking", value: event.location.parkingInfo.slice(0, 40) + (event.location.parkingInfo.length > 40 ? "…" : "") } : null,
-          ].filter(Boolean).map(({ icon: Icon, label, value }) => (
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ].filter(Boolean).map(({ icon: Icon, label, value }: any) => (
             <div key={label} className="flex items-start gap-3 p-4 rounded-xl border border-border bg-card">
               <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
                 <Icon className="w-4 h-4 text-muted-foreground" />

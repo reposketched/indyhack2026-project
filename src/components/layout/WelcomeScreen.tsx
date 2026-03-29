@@ -7,6 +7,7 @@ import {
   Users, DollarSign, Send, ChevronRight, X,
 } from "lucide-react";
 import { useEventStore } from "@/lib/store/eventStore";
+import { useAuthStore } from "@/lib/store/authStore";
 
 const DEMO_PREVIEW = {
   name: "Roots & Reach: Autumn Networking Summit",
@@ -19,6 +20,7 @@ const DEMO_PREVIEW = {
 
 export function WelcomeScreen() {
   const { startWithDemo, startFresh } = useEventStore();
+  const { user } = useAuthStore();
   const [mode, setMode] = useState<"welcome" | "new-plan">("welcome");
   const [form, setForm] = useState({
     name: "",
@@ -56,18 +58,22 @@ export function WelcomeScreen() {
       : form.date
         ? `${form.date}T00:00:00`
         : undefined;
-    startFresh({
-      name: form.name.trim(),
-      date: dateTimeStr ? new Date(dateTimeStr).toISOString() : undefined,
-      location: {
-        name: form.venueName.trim() || form.city.trim(),
-        address: "",
-        city: form.city.trim(),
-        state: form.state.trim(),
+    startFresh(
+      {
+        name: form.name.trim(),
+        date: dateTimeStr ? new Date(dateTimeStr).toISOString() : undefined,
+        location: {
+          name: form.venueName.trim() || form.city.trim(),
+          address: "",
+          city: form.city.trim(),
+          state: form.state.trim(),
+        },
+        guestCount: form.guests ? parseInt(form.guests) : 0,
+        budget: form.budget ? parseFloat(form.budget) : 0,
       },
-      guestCount: form.guests ? parseInt(form.guests) : 0,
-      budget: form.budget ? parseFloat(form.budget) : 0,
-    });
+      user?.name,
+      user?.email
+    );
   }
 
   return (

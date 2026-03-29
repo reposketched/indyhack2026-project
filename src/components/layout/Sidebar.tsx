@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   LayoutDashboard,
@@ -13,11 +13,14 @@ import {
   Mic,
   Send,
   ExternalLink,
-  ChevronRight,
   RefreshCw,
+  UserPlus,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEventStore } from "@/lib/store/eventStore";
+import { useAuthStore } from "@/lib/store/authStore";
+import { toast } from "sonner";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
@@ -27,13 +30,24 @@ const NAV_ITEMS = [
   { href: "/dashboard/operations", label: "Operations", icon: Calendar },
   { href: "/dashboard/tickets", label: "Tickets", icon: Ticket, badge: "Solana" },
   { href: "/dashboard/voice", label: "Voice", icon: Mic, badge: "ElevenLabs" },
+  { href: "/dashboard/team", label: "Team", icon: UserPlus },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { event, insights, hasStarted } = useEventStore();
+  const { user, logout } = useAuthStore();
+
   function handleSwitchEvent() {
     useEventStore.setState({ hasStarted: false });
+  }
+
+  function handleLogout() {
+    logout();
+    useEventStore.setState({ hasStarted: false });
+    toast.success("Logged out");
+    router.push("/login");
   }
 
   const unresolvedCount = insights.filter((i) => !i.isResolved).length;
@@ -123,14 +137,21 @@ export function Sidebar() {
 
       {/* User */}
       <div className="px-3 pb-4">
-        <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-muted cursor-pointer transition-colors">
+        <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg group">
           <div className="w-7 h-7 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-            AO
+            {user?.initials ?? "?"}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-xs font-medium text-foreground truncate">Alex Organizer</div>
-            <div className="text-[10px] text-muted-foreground">Event Organizer</div>
+            <div className="text-xs font-medium text-foreground truncate">{user?.name ?? "Guest"}</div>
+            <div className="text-[10px] text-muted-foreground truncate">{user?.email ?? ""}</div>
           </div>
+          <button
+            onClick={handleLogout}
+            title="Log out"
+            className="w-6 h-6 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex-shrink-0"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
     </aside>

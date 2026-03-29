@@ -9,8 +9,8 @@ import {
   ChevronRight, AlertCircle,
 } from "lucide-react";
 import { useEventStore } from "@/lib/store/eventStore";
-import { cn, truncate } from "@/lib/utils";
-import { DEMO_GUESTS } from "@/lib/data/events";
+import { cn, truncate, formatDate } from "@/lib/utils";
+import type { Guest } from "@/lib/schemas";
 import { getTierPerks } from "@/lib/services/solana";
 import { toast } from "sonner";
 
@@ -144,10 +144,12 @@ function NFTTicketCard({
 }
 
 export default function TicketsPage() {
-  const { mintedTicketAddress, setMintedTicketAddress, isMinting, setIsMinting, event } = useEventStore();
+  const { mintedTicketAddress, setMintedTicketAddress, isMinting, setIsMinting, event, guests } = useEventStore();
+  const confirmedGuests = guests.filter((g) => g.rsvpStatus === "confirmed");
   const [walletConnected, setWalletConnected] = useState(false);
-  const [selectedGuest, setSelectedGuest] = useState(DEMO_GUESTS[0]);
+  const [selectedGuest, setSelectedGuest] = useState<Guest | null>(confirmedGuests[0] ?? null);
   const [mintedGuests, setMintedGuests] = useState<string[]>([]);
+  const eventDateStr = formatDate(event.date, "short");
 
   const handleConnectWallet = () => {
     setWalletConnected(true);
@@ -155,10 +157,8 @@ export default function TicketsPage() {
   };
 
   const handleMint = async () => {
-    if (!walletConnected) {
-      toast.error("Connect wallet first");
-      return;
-    }
+    if (!selectedGuest) { toast.error("Select a guest first"); return; }
+    if (!walletConnected) { toast.error("Connect wallet first"); return; }
     setIsMinting(true);
     try {
       const res = await fetch("/api/tickets/mint", {
@@ -169,7 +169,7 @@ export default function TicketsPage() {
           guestId: selectedGuest._id,
           attendeeName: selectedGuest.name,
           eventName: event.name,
-          eventDate: "September 20, 2025",
+          eventDate: eventDateStr,
           tier: selectedGuest.accessTier,
           mealPreference: selectedGuest.mealPreference,
         }),
@@ -226,92 +226,107 @@ export default function TicketsPage() {
           {/* Select guest */}
           <div className="card-base p-5">
             <div className="section-label mb-4">Step 2: Select Attendee</div>
-            <div className="grid sm:grid-cols-2 gap-3">
-              {DEMO_GUESTS.filter((g) => g.rsvpStatus === "confirmed").map((guest) => (
-                <button
-                  key={guest._id}
-                  onClick={() => setSelectedGuest(guest)}
-                  className={cn(
-                    "flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all",
-                    selectedGuest._id === guest._id
-                      ? "border-brand-300 bg-brand-50 dark:border-brand-700 dark:bg-brand-900/40"
-                      : "border-border bg-card hover:bg-muted/40"
-                  )}
-                >
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                    {guest.name.split(" ").map((n) => n[0]).join("")}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-foreground truncate">{guest.name}</div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-1">
-                      <span className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0",
-                        guest.accessTier === "vip" ? "bg-amber-400" : guest.accessTier === "speaker" ? "bg-violet-400" : "bg-brand-400"
-                      )} />
-                      {guest.accessTier} · {guest.mealPreference}
+            {confirmedGuests.length === 0 ? (
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-muted/40 border border-border text-sm text-muted-foreground">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                No confirmed guests yet. Add guests with confirmed RSVP status to mint tickets.
+              </div>
+            ) : (
+              <div className="grid sm:grid-cols-2 gap-3">
+                {confirmedGuests.map((guest) => (
+                  <button
+                    key={guest._id}
+                    onClick={() => setSelectedGuest(guest)}
+                    className={cn(
+                      "flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all",
+                      selectedGuest?._id === guest._id
+                        ? "border-brand-300 bg-brand-50 dark:border-brand-700 dark:bg-brand-900/40"
+                        : "border-border bg-card hover:bg-muted/40"
+                    )}
+                  >
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                      {guest.name.split(" ").map((n) => n[0]).join("")}
                     </div>
-                  </div>
-                  {mintedGuests.includes(guest._id!) && (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                  )}
-                </button>
-              ))}
-            </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-foreground truncate">{guest.name}</div>
+                      <div className="text-xs text-muted-foreground flex items-center gap-1">
+                        <span className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0",
+                          guest.accessTier === "vip" ? "bg-amber-400" : guest.accessTier === "speaker" ? "bg-violet-400" : "bg-brand-400"
+                        )} />
+                        {guest.accessTier} · {guest.mealPreference ?? "no pref"}
+                      </div>
+                    </div>
+                    {mintedGuests.includes(guest._id!) && (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Mint */}
           <div className="card-base p-5">
             <div className="section-label mb-4">Step 3: Mint NFT Ticket</div>
-            <div className="flex items-start gap-4 mb-5 p-4 rounded-xl bg-muted/40 border border-border">
-              <div className="flex-1 space-y-2">
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="text-muted-foreground w-24">Attendee</span>
-                  <span className="font-medium text-foreground">{selectedGuest.name}</span>
+            {selectedGuest ? (
+              <>
+                <div className="flex items-start gap-4 mb-5 p-4 rounded-xl bg-muted/40 border border-border">
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="text-muted-foreground w-24">Attendee</span>
+                      <span className="font-medium text-foreground">{selectedGuest.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="text-muted-foreground w-24">Access Tier</span>
+                      <span className="font-semibold text-foreground capitalize">{selectedGuest.accessTier}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="text-muted-foreground w-24">Meal Pref</span>
+                      <span className="font-medium text-foreground capitalize">{selectedGuest.mealPreference || "Not set"}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="text-muted-foreground w-24">Network</span>
+                      <span className="font-medium text-violet-600">Solana Devnet</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs text-muted-foreground">Est. cost</div>
+                    <div className="text-sm font-bold text-foreground">~0.0012 SOL</div>
+                    <div className="text-[10px] text-muted-foreground">compressed NFT</div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="text-muted-foreground w-24">Access Tier</span>
-                  <span className="font-semibold text-foreground capitalize">{selectedGuest.accessTier}</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="text-muted-foreground w-24">Meal Pref</span>
-                  <span className="font-medium text-foreground capitalize">{selectedGuest.mealPreference || "Not set"}</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="text-muted-foreground w-24">Network</span>
-                  <span className="font-medium text-violet-600">Solana Devnet</span>
-                </div>
+                <button
+                  onClick={handleMint}
+                  disabled={isMinting || mintedGuests.includes(selectedGuest._id!)}
+                  className={cn("w-full py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2",
+                    mintedGuests.includes(selectedGuest._id!)
+                      ? "bg-emerald-500 text-white cursor-default"
+                      : "bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-60"
+                  )}
+                >
+                  {isMinting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Minting on Solana...
+                    </>
+                  ) : mintedGuests.includes(selectedGuest._id!) ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      Ticket Minted
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-4 h-4" />
+                      Mint NFT Ticket
+                    </>
+                  )}
+                </button>
+              </>
+            ) : (
+              <div className="text-sm text-muted-foreground text-center py-4">
+                Select a confirmed guest above to mint their ticket.
               </div>
-              <div className="text-right">
-                <div className="text-xs text-muted-foreground">Est. cost</div>
-                <div className="text-sm font-bold text-foreground">~0.0012 SOL</div>
-                <div className="text-[10px] text-muted-foreground">compressed NFT</div>
-              </div>
-            </div>
-            <button
-              onClick={handleMint}
-              disabled={isMinting || mintedGuests.includes(selectedGuest._id!)}
-              className={cn("w-full py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2",
-                mintedGuests.includes(selectedGuest._id!)
-                  ? "bg-emerald-500 text-white cursor-default"
-                  : "bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-60"
-              )}
-            >
-              {isMinting ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Minting on Solana...
-                </>
-              ) : mintedGuests.includes(selectedGuest._id!) ? (
-                <>
-                  <CheckCircle2 className="w-4 h-4" />
-                  Ticket Minted
-                </>
-              ) : (
-                <>
-                  <Zap className="w-4 h-4" />
-                  Mint NFT Ticket
-                </>
-              )}
-            </button>
+            )}
           </div>
 
           {/* Escrow */}
@@ -369,13 +384,13 @@ export default function TicketsPage() {
         {/* Right: NFT card */}
         <div className="space-y-4">
           <div className="section-label">Generated NFT Ticket</div>
-          {mintedTicketAddress ? (
+          {mintedTicketAddress && selectedGuest ? (
             <NFTTicketCard
               mintAddress={mintedTicketAddress}
               attendeeName={selectedGuest.name}
               tier={selectedGuest.accessTier}
               eventName={event.name}
-              eventDate="September 20, 2025"
+              eventDate={eventDateStr}
               mealPref={selectedGuest.mealPreference}
               perks={getTierPerks(selectedGuest.accessTier)}
             />

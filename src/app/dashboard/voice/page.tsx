@@ -158,8 +158,14 @@ export default function VoicePage() {
               </button>
 
               <button
-                onClick={() => toast.info("In live mode, this would start a real-time call")}
-                className="w-16 h-16 rounded-full bg-brand-600 hover:bg-brand-700 flex items-center justify-center shadow-glow transition-all"
+                onClick={() => {
+                  const q = "What time does the event start and where is it?";
+                  setCurrentQuestion(q);
+                  handleQuestion(q);
+                }}
+                disabled={isLoading}
+                title="Ask a sample question"
+                className="w-16 h-16 rounded-full bg-brand-600 hover:bg-brand-700 disabled:opacity-60 flex items-center justify-center shadow-glow transition-all"
               >
                 <Phone className="w-6 h-6 text-white" />
               </button>

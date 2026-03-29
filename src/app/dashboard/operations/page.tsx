@@ -8,7 +8,7 @@ import {
   Activity, RefreshCw, Filter,
 } from "lucide-react";
 import { useEventStore } from "@/lib/store/eventStore";
-import { cn, formatDate } from "@/lib/utils";
+import { cn, formatDate, formatCurrency } from "@/lib/utils";
 import type { TimelineItem } from "@/lib/schemas";
 import { toast } from "sonner";
 
@@ -35,13 +35,7 @@ const PRIORITY_DOT = {
   low: "bg-muted-foreground",
 };
 
-const LIVE_UPDATES = [
-  { time: "2 min ago", message: "Harvest & Hearth confirmed nut-free station setup", type: "success" },
-  { time: "15 min ago", message: "RSVP count reached 147 — up 12 this week", type: "info" },
-  { time: "1 hr ago", message: "Gemini detected deposit timing conflict — review in AI Planner", type: "warning" },
-  { time: "3 hr ago", message: "Iron & Ember Events contract sent for signature", type: "info" },
-  { time: "Yesterday", message: "Golden Hour Studios brief scheduled for Sep 10", type: "success" },
-];
+// Live updates are generated dynamically in the component
 
 function TimelineItemRow({
   item,
@@ -121,7 +115,7 @@ function TimelineItemRow({
 }
 
 export default function OperationsPage() {
-  const { timelineItems, completeTimelineItem } = useEventStore();
+  const { timelineItems, completeTimelineItem, event, eventPlan, insights } = useEventStore();
   const [filter, setFilter] = useState<"all" | "pending" | "completed" | "overdue">("all");
   const [isSimulating, setIsSimulating] = useState(false);
 
@@ -250,15 +244,41 @@ export default function OperationsPage() {
 
         {/* Right column */}
         <div className="space-y-5">
-          {/* Live updates */}
+          {/* Live updates — built from real store data */}
           <div className="card-base overflow-hidden">
             <div className="px-4 py-3 border-b border-border flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-xs font-semibold text-foreground">Live Updates</span>
+              <span className="text-xs font-semibold text-foreground">Activity</span>
               <span className="ml-auto text-[10px] text-muted-foreground">MongoDB change stream</span>
             </div>
             <div className="divide-y divide-border">
-              {LIVE_UPDATES.map((update, i) => (
+              {[
+                event.confirmedGuests > 0 && {
+                  message: `${event.confirmedGuests} of ${event.guestCount} guests confirmed — ${Math.round((event.confirmedGuests / event.guestCount) * 100)}% RSVPed`,
+                  type: "info",
+                  time: "Now",
+                },
+                insights.filter((i) => !i.isResolved).length > 0 && {
+                  message: `${insights.filter((i) => !i.isResolved).length} active AI alert${insights.filter((i) => !i.isResolved).length > 1 ? "s" : ""} — review in AI Planner`,
+                  type: "warning",
+                  time: "Active",
+                },
+                timelineItems.filter((t) => t.status === "completed").length > 0 && {
+                  message: `${timelineItems.filter((t) => t.status === "completed").length} milestone${timelineItems.filter((t) => t.status === "completed").length > 1 ? "s" : ""} completed`,
+                  type: "success",
+                  time: "Recent",
+                },
+                timelineItems.filter((t) => t.type === "deposit" && t.status !== "completed").length > 0 && {
+                  message: `${timelineItems.filter((t) => t.type === "deposit" && t.status !== "completed").length} vendor deposit${timelineItems.filter((t) => t.type === "deposit" && t.status !== "completed").length > 1 ? "s" : ""} pending`,
+                  type: "warning",
+                  time: "Upcoming",
+                },
+                eventPlan && {
+                  message: "AI event plan generated — run of show available below",
+                  type: "success",
+                  time: "Generated",
+                },
+              ].filter((x): x is { message: string; type: string; time: string } => Boolean(x)).map((update, i) => (
                 <div key={i} className="px-4 py-3 flex items-start gap-2.5">
                   <div className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1.5",
                     update.type === "success" ? "bg-emerald-400" : update.type === "warning" ? "bg-amber-400" : "bg-brand-400"
@@ -269,34 +289,40 @@ export default function OperationsPage() {
                   </div>
                 </div>
               ))}
+              {insights.length === 0 && timelineItems.length === 0 && (
+                <div className="px-4 py-6 text-center text-xs text-muted-foreground">
+                  Activity will appear as you plan your event
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Run of show */}
+          {/* Run of show — from AI plan if available */}
           <div className="card-base overflow-hidden">
             <div className="px-4 py-3 border-b border-border">
               <div className="text-xs font-semibold text-foreground">Day-of Run of Show</div>
-              <div className="text-[10px] text-muted-foreground">Sep 20, 2025</div>
+              <div className="text-[10px] text-muted-foreground">
+                {eventPlan ? `${eventPlan.date} · ${eventPlan.time}` : "Generate a plan in AI Planner to populate"}
+              </div>
             </div>
-            <div className="divide-y divide-border">
-              {[
-                { time: "3:00 PM", activity: "Vendor setup & load-in", done: false },
-                { time: "4:45 PM", activity: "Registration opens", done: false },
-                { time: "5:00 PM", activity: "Doors open — guest arrival", done: false },
-                { time: "5:30 PM", activity: "Networking + coffee bar", done: false },
-                { time: "6:30 PM", activity: "Golden hour photography", done: false },
-                { time: "7:00 PM", activity: "Main food stations open", done: false },
-                { time: "8:30 PM", activity: "Fireside speaker talk", done: false },
-                { time: "9:00 PM", activity: "Final networking + dessert", done: false },
-                { time: "10:00 PM", activity: "Coordinated departure", done: false },
-              ].map((item) => (
-                <div key={item.time} className="flex items-center gap-3 px-4 py-2.5">
-                  <span className="text-xs font-mono text-brand-600 w-16 flex-shrink-0">{item.time}</span>
-                  <span className="text-xs text-foreground">{item.activity}</span>
-                  <ChevronRight className="w-3 h-3 text-muted-foreground ml-auto" />
-                </div>
-              ))}
-            </div>
+            {eventPlan?.schedule && eventPlan.schedule.length > 0 ? (
+              <div className="divide-y divide-border">
+                {eventPlan.schedule.map((item) => (
+                  <div key={item.time} className="flex items-center gap-3 px-4 py-2.5">
+                    <span className="text-xs font-mono text-brand-600 w-16 flex-shrink-0">{item.time}</span>
+                    <span className="text-xs text-foreground flex-1">{item.activity}</span>
+                    <span className="text-[10px] text-muted-foreground">{item.duration}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="px-4 py-6 text-center text-xs text-muted-foreground">
+                Run of show populates after you generate a plan in{" "}
+                <a href="/dashboard/planner" className="text-brand-600 hover:text-brand-700 underline underline-offset-2">
+                  AI Planner
+                </a>
+              </div>
+            )}
           </div>
 
           {/* Upcoming deposits */}

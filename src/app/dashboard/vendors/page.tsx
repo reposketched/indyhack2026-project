@@ -288,14 +288,16 @@ export default function VendorsPage() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [compareList, setCompareList] = useState<string[]>([]);
   const [showCompare, setShowCompare] = useState(false);
+  const [minRating, setMinRating] = useState(0);
+  const [showFilters, setShowFilters] = useState(false);
 
   const displayVendors = vendorResults.length > 0
     ? vendorResults
     : getMockVendorMatches("rustic outdoor catering vegetarian networking").map((v) => v);
 
-  const filteredVendors = activeCategory === "all"
-    ? displayVendors
-    : displayVendors.filter((v) => v.category === activeCategory);
+  const filteredVendors = displayVendors
+    .filter((v) => activeCategory === "all" || v.category === activeCategory)
+    .filter((v) => v.rating >= minRating);
 
   const categories = Array.from(new Set(displayVendors.map((v) => v.category)));
   const compareVendors = displayVendors.filter((v) => compareList.includes(v._id || ""));
@@ -368,10 +370,46 @@ export default function VendorsPage() {
               <><Search className="w-4 h-4" /> Search</>
             )}
           </button>
-          <button className="btn-secondary px-3">
+          <button
+            onClick={() => setShowFilters((v) => !v)}
+            className={cn("btn-secondary px-3", showFilters && "bg-brand-50 text-brand-700 border-brand-200 dark:bg-brand-900/40 dark:text-brand-400")}
+          >
             <SlidersHorizontal className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Filter panel */}
+        {showFilters && (
+          <div className="flex items-center gap-6 p-3.5 rounded-xl bg-muted/40 border border-border text-sm">
+            <div className="flex items-center gap-3">
+              <label className="text-xs font-medium text-foreground whitespace-nowrap">Min rating</label>
+              <div className="flex items-center gap-1">
+                {[0, 3, 4, 4.5].map((r) => (
+                  <button
+                    key={r}
+                    onClick={() => setMinRating(r)}
+                    className={cn(
+                      "px-2.5 py-1 rounded-lg text-xs font-medium transition-all",
+                      minRating === r
+                        ? "bg-brand-600 text-white"
+                        : "bg-card border border-border text-muted-foreground hover:bg-muted"
+                    )}
+                  >
+                    {r === 0 ? "Any" : `${r}+`}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center gap-2 ml-auto">
+              <button
+                onClick={() => { setMinRating(0); setActiveCategory("all"); }}
+                className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
+              >
+                Reset filters
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Demo queries */}
         <div className="flex flex-wrap gap-2">

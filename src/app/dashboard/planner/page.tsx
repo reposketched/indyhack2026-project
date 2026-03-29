@@ -188,6 +188,8 @@ export default function PlannerPage() {
   const [isListening, setIsListening] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -205,10 +207,11 @@ export default function PlannerPage() {
     addChatMessage({ role: "assistant", content: "", isStreaming: true });
 
     try {
+      const { event: currentEvent } = useEventStore.getState();
       const res = await fetch("/api/gemini", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: text, eventId: "event_demo_001" }),
+        body: JSON.stringify({ prompt: text, eventId: currentEvent._id }),
       });
       const data = await res.json();
 
@@ -226,6 +229,43 @@ export default function PlannerPage() {
   const handleDemoFill = () => {
     setInput(DEMO_PROMPT);
     inputRef.current?.focus();
+  };
+
+  const toggleMic = () => {
+    if (typeof window === "undefined") return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SpeechRecognitionAPI = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognitionAPI) {
+      toast.error("Voice input not supported in this browser");
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      return;
+    }
+
+    const recognition = new SpeechRecognitionAPI();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setInput((prev: string) => (prev ? prev + " " + transcript : transcript));
+      setIsListening(false);
+    };
+    recognition.onerror = () => {
+      toast.error("Voice input failed. Try again.");
+      setIsListening(false);
+    };
+    recognition.onend = () => setIsListening(false);
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
+    toast.info("Listening… speak your prompt");
   };
 
   const unresolvedInsights = insights.filter((i) => !i.isResolved);
@@ -349,7 +389,8 @@ export default function PlannerPage() {
                 className="w-full px-4 py-3 pr-12 rounded-xl border border-border bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none scrollbar-hide"
               />
               <button
-                onClick={() => setIsListening((v) => !v)}
+                onClick={toggleMic}
+                title={isListening ? "Stop listening" : "Speak your prompt"}
                 className={cn(
                   "absolute right-3 bottom-3 w-7 h-7 rounded-lg flex items-center justify-center transition-all",
                   isListening ? "bg-rose-100 text-rose-600 animate-pulse" : "text-muted-foreground hover:bg-muted hover:text-foreground"
