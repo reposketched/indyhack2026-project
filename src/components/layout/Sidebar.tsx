@@ -14,6 +14,7 @@ import {
   Send,
   ExternalLink,
   ChevronRight,
+  RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEventStore } from "@/lib/store/eventStore";
@@ -30,7 +31,10 @@ const NAV_ITEMS = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { event, insights } = useEventStore();
+  const { event, insights, hasStarted } = useEventStore();
+  function handleSwitchEvent() {
+    useEventStore.setState({ hasStarted: false });
+  }
 
   const unresolvedCount = insights.filter((i) => !i.isResolved).length;
 
@@ -42,19 +46,27 @@ export function Sidebar() {
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-glow-sm group-hover:shadow-glow transition-shadow">
             <Send className="w-4 h-4 text-white" />
           </div>
-          <span className="text-sm font-bold font-display text-foreground">Com-Plan-ion</span>
+          <span className="text-sm font-bold font-display text-gradient">Complanion</span>
         </Link>
       </div>
 
       {/* Event selector */}
       <div className="px-3 py-3 border-b border-border">
-        <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg bg-muted/60 hover:bg-muted cursor-pointer transition-colors group">
+        <div
+          onClick={handleSwitchEvent}
+          className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg bg-muted/60 hover:bg-muted cursor-pointer transition-colors group"
+          title="Switch event"
+        >
           <div className="w-7 h-7 rounded-md bg-gradient-to-br from-brand-400 to-brand-600 flex-shrink-0" />
           <div className="flex-1 min-w-0">
-            <div className="text-xs font-medium text-foreground truncate">{event.name}</div>
-            <div className="text-[10px] text-muted-foreground">{event.status === "planning" ? "In planning" : event.status}</div>
+            <div className="text-xs font-medium text-foreground truncate">
+              {hasStarted ? event.name : "No event selected"}
+            </div>
+            <div className="text-[10px] text-muted-foreground">
+              {hasStarted ? (event.status === "planning" ? "In planning" : event.status) : "Click to select"}
+            </div>
           </div>
-          <ChevronRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
+          <RefreshCw className="w-3 h-3 text-muted-foreground group-hover:text-foreground transition-colors" />
         </div>
       </div>
 

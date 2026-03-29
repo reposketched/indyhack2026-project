@@ -55,6 +55,11 @@ interface EventStore {
   setTimelineItems: (items: TimelineItem[]) => void;
   completeTimelineItem: (id: string) => void;
 
+  // Welcome / start gate
+  hasStarted: boolean;
+  startWithDemo: () => void;
+  startFresh: (eventData: Partial<Event>) => void;
+
   // Demo mode
   isDemoMode: boolean;
   demoStep: DemoStep;
@@ -139,6 +144,56 @@ export const useEventStore = create<EventStore>((set, get) => ({
         t._id === id ? { ...t, status: "completed", completedAt: new Date().toISOString() } : t
       ),
     })),
+
+  // Welcome / start gate
+  hasStarted: false,
+  startWithDemo: () =>
+    set({
+      hasStarted: true,
+      isDemoMode: true,
+      event: DEMO_EVENT,
+      insights: DEMO_AI_INSIGHTS,
+      budgetItems: DEMO_BUDGET_ITEMS,
+      timelineItems: DEMO_TIMELINE_ITEMS,
+      shortlistedVendors: ["vendor_001", "vendor_003", "vendor_005", "vendor_007", "vendor_010"],
+      chatMessages: [],
+      eventPlan: null,
+      vendorResults: [],
+      mintedTicketAddress: null,
+      voiceTranscript: [],
+    }),
+  startFresh: (eventData) =>
+    set({
+      hasStarted: true,
+      isDemoMode: false,
+      event: {
+        _id: generateId(),
+        slug: eventData.name?.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") ?? "my-event",
+        name: eventData.name ?? "My Event",
+        description: "",
+        theme: "",
+        status: "planning",
+        date: eventData.date ?? new Date().toISOString(),
+        location: eventData.location ?? { name: "", address: "", city: "", state: "" },
+        guestCount: eventData.guestCount ?? 0,
+        confirmedGuests: 0,
+        budget: eventData.budget ?? 0,
+        organizerId: "user_001",
+        tags: [],
+        accentColor: "#2563eb",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      chatMessages: [],
+      eventPlan: null,
+      vendorResults: [],
+      shortlistedVendors: [],
+      budgetItems: [],
+      timelineItems: [],
+      insights: [],
+      mintedTicketAddress: null,
+      voiceTranscript: [],
+    }),
 
   // Demo mode
   isDemoMode: false,

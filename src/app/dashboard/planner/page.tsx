@@ -233,7 +233,7 @@ export default function PlannerPage() {
   return (
     <div className="flex h-[calc(100vh-56px)]">
       {/* ── Chat Panel ──────────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col border-r border-border min-w-0">
+      <div className="flex-[2] flex flex-col border-r border-border min-w-0">
         {/* Header */}
         <div className="px-6 py-4 border-b border-border flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-2.5">
@@ -374,19 +374,19 @@ export default function PlannerPage() {
       </div>
 
       {/* ── Right Panel: Plan + Insights ─────────────────────────────────── */}
-      <div className="w-96 flex flex-col bg-muted/20 overflow-y-auto scrollbar-thin">
+      <div className="flex-[3] flex flex-col bg-muted/20 overflow-y-auto scrollbar-thin">
         {/* Plan panel */}
         <div className="p-5 border-b border-border">
           <div className="flex items-center justify-between mb-4">
             <div className="text-sm font-semibold text-foreground">Event Plan</div>
             {!eventPlan && (
               <button
-                onClick={() => handleSend(DEMO_PROMPT)}
+                onClick={() => handleSend(input.trim() || DEMO_PROMPT)}
                 disabled={isGenerating}
                 className="btn-primary text-xs py-1.5 px-3"
               >
                 <Sparkles className="w-3 h-3" />
-                Generate Plan
+                {input.trim() ? "Generate Plan" : "Try Demo"}
               </button>
             )}
           </div>
@@ -402,7 +402,7 @@ export default function PlannerPage() {
           ) : (
             <div className="text-center py-10">
               <Sparkles className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground">Send a message to generate your event plan</p>
+              <p className="text-sm text-muted-foreground">Type your event prompt on the left, then click <span className="font-medium text-foreground">Generate Plan</span></p>
             </div>
           )}
         </div>

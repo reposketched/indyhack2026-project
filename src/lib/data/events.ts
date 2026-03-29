@@ -8,8 +8,8 @@ export const DEMO_EVENT: Event = {
     "A curated outdoor networking experience for 200 tech and creative professionals. Set against the backdrop of the Indiana countryside, this rustic-modern gathering pairs meaningful conversations with farm-fresh flavors and warm ambient atmosphere.",
   theme: "Rustic Outdoor Networking",
   status: "planning",
-  date: "2025-09-20T17:00:00.000Z",
-  endDate: "2025-09-20T22:00:00.000Z",
+  date: "2026-09-20T17:00:00.000Z",
+  endDate: "2026-09-20T22:00:00.000Z",
   location: {
     name: "Iron & Ember Events",
     address: "12120 Brookshire Pkwy",
