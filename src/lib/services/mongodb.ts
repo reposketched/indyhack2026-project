@@ -28,17 +28,21 @@ const IS_MOCK = process.env.MOCK_MODE === "true" || !process.env.MONGODB_URI;
 
 // ─── MongoDB Client (real mode) ───────────────────────────────────────────────
 
-let mongoClient: unknown = null;
+// Cache client in global so Next.js HMR module reloads don't reconnect every request
+const g = global as typeof globalThis & { _mongoClient?: unknown };
 
 async function getMongoClient() {
   if (IS_MOCK) return null;
-  if (mongoClient) return mongoClient;
+  if (g._mongoClient) return g._mongoClient;
 
-  // Dynamic import to avoid bundling MongoDB in mock mode
   const { MongoClient } = await import("mongodb");
-  mongoClient = new MongoClient(process.env.MONGODB_URI!);
-  await (mongoClient as { connect: () => Promise<void> }).connect();
-  return mongoClient;
+  const client = new MongoClient(process.env.MONGODB_URI!, {
+    serverSelectionTimeoutMS: 10000,
+    connectTimeoutMS: 10000,
+  });
+  await client.connect();
+  g._mongoClient = client;
+  return g._mongoClient;
 }
 
 async function getDb() {
@@ -55,7 +59,10 @@ export async function getEvent(slug: string): Promise<Event | null> {
   }
 
   const db = await getDb() as { collection: (name: string) => { findOne: (q: unknown) => Promise<Event | null> } };
-  return db.collection("events").findOne({ slug });
+  const event = await db.collection("events").findOne({ slug });
+  // Fall back to demo event so the demo link always works
+  if (!event && DEMO_EVENT.slug === slug) return DEMO_EVENT;
+  return event;
 }
 
 export async function updateEvent(eventId: string, data: Partial<Event>): Promise<void> {
@@ -220,4 +227,47 @@ export async function resolveInsight(insightId: string): Promise<void> {
     { _id: insightId },
     { $set: { isResolved: true, resolvedAt: new Date().toISOString() } }
   );
+}
+
+// ─── Save Event ───────────────────────────────────────────────────────────────
+
+export async function saveEvent(event: Partial<Event>): Promise<void> {
+  if (IS_MOCK) {
+    await sleep(200);
+    return;
+  }
+
+  const db = await getDb() as { collection: (name: string) => { updateOne: (q: unknown, u: unknown, opts: unknown) => Promise<void> } };
+  await db.collection("events").updateOne(
+    { slug: event.slug },
+    { $set: { ...event, updatedAt: new Date().toISOString() } },
+    { upsert: true }
+  );
+}
+
+// ─── RSVPs ────────────────────────────────────────────────────────────────────
+
+export async function saveRSVP(rsvp: Omit<Guest, "_id">): Promise<void> {
+  if (IS_MOCK) {
+    await sleep(200);
+    return;
+  }
+
+  const db = await getDb() as { collection: (name: string) => { updateOne: (q: unknown, u: unknown, opts: unknown) => Promise<void> } };
+  // Upsert by email + eventId so the same person can't RSVP twice
+  await db.collection("guests").updateOne(
+    { eventId: rsvp.eventId, email: rsvp.email },
+    { $set: { ...rsvp, updatedAt: new Date().toISOString() } },
+    { upsert: true }
+  );
+}
+
+export async function getRSVPs(eventId: string): Promise<Guest[]> {
+  if (IS_MOCK) {
+    await sleep(150);
+    return DEMO_GUESTS.filter((g) => g.eventId === eventId);
+  }
+
+  const db = await getDb() as { collection: (name: string) => { find: (q: unknown) => { sort: (s: unknown) => { toArray: () => Promise<Guest[]> } } } };
+  return db.collection("guests").find({ eventId }).sort({ createdAt: -1 }).toArray();
 }

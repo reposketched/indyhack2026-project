@@ -4,7 +4,11 @@
       "Bash(npm install:*)",
       "Bash(npm run:*)",
       "Bash(npx next:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(xargs ls:*)",
+      "Bash(find /c/Users/RuthuShankar/Desktop/indyhack2026-project -name *guest* -type f)",
+      "Bash(npx tsc:*)",
+      "Bash(ls:*)"
     ]
   }
 }

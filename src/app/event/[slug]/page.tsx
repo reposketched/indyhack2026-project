@@ -1,16 +1,17 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   MapPin, Calendar, Clock, Users, Mic,
   ChevronDown, ChevronUp, CheckCircle2, Sparkles,
-  Car, ArrowRight, Ticket, Navigation, ExternalLink,
+  Car, ArrowRight, Ticket, Navigation, ExternalLink, Loader2,
 } from "lucide-react";
-import { useEventStore } from "@/lib/store/eventStore";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import type { Event } from "@/lib/schemas";
 
 function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
@@ -120,17 +121,223 @@ function ConciergeWidget({ eventName }: { eventName: string }) {
   );
 }
 
-export default function EventGuestPage() {
-  const { event, eventPlan, isDemoMode } = useEventStore();
+function DirectionsCard({
+  fullAddress,
+  mapsQuery,
+  coordinates,
+  parkingInfo,
+}: {
+  fullAddress: string;
+  mapsQuery: string;
+  coordinates?: { lat: number; lng: number };
+  parkingInfo?: string;
+}) {
+  const [driveTime, setDriveTime] = useState<string | null>(null);
+  const [loadingTime, setLoadingTime] = useState(false);
+  const [locationDenied, setLocationDenied] = useState(false);
 
+  useEffect(() => {
+    if (!coordinates || typeof navigator === "undefined" || !navigator.geolocation) return;
+    setLoadingTime(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          const res = await fetch(
+            `/api/directions?origin=${latitude},${longitude}&dest=${coordinates.lat},${coordinates.lng}`
+          );
+          if (res.ok) {
+            const data = await res.json();
+            const driving = data.all?.find((r: { mode: string }) => r.mode === "driving");
+            if (driving) setDriveTime(driving.durationText);
+          }
+        } catch {
+          // silently ignore
+        } finally {
+          setLoadingTime(false);
+        }
+      },
+      () => {
+        setLocationDenied(true);
+        setLoadingTime(false);
+      }
+    );
+  }, [coordinates]);
+
+  const mapSrc = coordinates
+    ? `https://www.openstreetmap.org/export/embed.html?bbox=${coordinates.lng - 0.02}%2C${coordinates.lat - 0.008}%2C${coordinates.lng + 0.02}%2C${coordinates.lat + 0.008}&layer=mapnik&marker=${coordinates.lat}%2C${coordinates.lng}`
+    : `https://www.openstreetmap.org/export/embed.html?query=${mapsQuery}&layer=mapnik`;
+
+  const largeMapHref = coordinates
+    ? `https://www.openstreetmap.org/?mlat=${coordinates.lat}&mlon=${coordinates.lng}#map=16/${coordinates.lat}/${coordinates.lng}`
+    : `https://www.openstreetmap.org/search?query=${mapsQuery}`;
+
+  return (
+    <div className="space-y-3">
+      <div className="p-5 rounded-xl bg-muted/40 border border-border">
+        <div className="flex items-start justify-between gap-4 mb-3">
+          <div className="flex items-center gap-2">
+            <Car className="w-4 h-4 text-muted-foreground" />
+            <h3 className="text-sm font-semibold text-foreground">Getting There</h3>
+          </div>
+          {mapsQuery && (
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${mapsQuery}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-600 text-white text-xs font-semibold hover:bg-brand-700 transition-colors"
+            >
+              <Navigation className="w-3.5 h-3.5" />
+              Get Directions
+            </a>
+          )}
+        </div>
+        {fullAddress && (
+          <div className="flex items-center gap-1.5 text-sm text-foreground font-medium mb-2">
+            <MapPin className="w-3.5 h-3.5 text-muted-foreground" />
+            {fullAddress}
+          </div>
+        )}
+        {parkingInfo && (
+          <p className="text-sm text-muted-foreground leading-relaxed mb-2">{parkingInfo}</p>
+        )}
+        {/* Drive time badge */}
+        <div className="mt-3">
+          {loadingTime ? (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted border border-border text-xs text-muted-foreground">
+              <Loader2 className="w-3 h-3 animate-spin" />
+              Calculating drive time…
+            </div>
+          ) : driveTime ? (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800/40 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+              <Car className="w-3.5 h-3.5" />
+              {driveTime} by car from your location
+            </div>
+          ) : locationDenied ? (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted border border-border text-xs text-muted-foreground">
+              <MapPin className="w-3 h-3" />
+              Allow location access to see drive time
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      {/* Map */}
+      <div className="rounded-xl overflow-hidden border border-border shadow-card w-full relative" style={{ height: "320px" }}>
+        <iframe
+          title="Venue location"
+          width="100%"
+          height="320"
+          style={{ border: 0, display: "block" }}
+          src={mapSrc}
+        />
+        <a
+          href={largeMapHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium bg-white/90 dark:bg-gray-900/90 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:bg-white transition-colors shadow-sm"
+        >
+          <ExternalLink className="w-3 h-3" />
+          View larger map
+        </a>
+      </div>
+    </div>
+  );
+}
+
+export default function EventGuestPage() {
+  const params = useParams();
+  const slug = params.slug as string;
+
+  const [event, setEvent] = useState<Event | null>(null);
+  const [loadingEvent, setLoadingEvent] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [location, setLocation] = useState("");
   const [mealPref, setMealPref] = useState("");
   const [rsvpDone, setRsvpDone] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleRSVP = () => {
+  useEffect(() => {
+    async function fetchEvent() {
+      try {
+        const res = await fetch(`/api/events/${slug}`);
+        if (res.status === 404) {
+          setNotFound(true);
+          return;
+        }
+        if (res.ok) {
+          const data = await res.json();
+          setEvent(data);
+        } else {
+          setNotFound(true);
+        }
+      } catch {
+        setNotFound(true);
+      } finally {
+        setLoadingEvent(false);
+      }
+    }
+    fetchEvent();
+  }, [slug]);
+
+  const handleRSVP = async () => {
+    if (!name.trim()) { toast.error("Please enter your name"); return; }
+    if (!email.trim()) { toast.error("Please enter your email"); return; }
     if (!mealPref) { toast.error("Please select a meal preference"); return; }
-    setRsvpDone(true);
-    toast.success("RSVP confirmed!", { description: "Check your email for your ticket." });
+    if (!event) return;
+
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/rsvp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventId: event._id,
+          name,
+          email,
+          location,
+          mealPreference: mealPref,
+        }),
+      });
+      if (res.ok) {
+        setRsvpDone(true);
+        toast.success("RSVP confirmed!", { description: "Check your email for your ticket." });
+      } else {
+        toast.error("Failed to submit RSVP. Please try again.");
+      }
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  if (loadingEvent) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 text-brand-600 animate-spin" />
+          <p className="text-sm text-muted-foreground">Loading event…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (notFound || !event) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center max-w-sm px-6">
+          <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+            <Ticket className="w-8 h-8 text-muted-foreground" />
+          </div>
+          <h1 className="text-xl font-bold font-display text-foreground mb-2">Event Not Found</h1>
+          <p className="text-sm text-muted-foreground">This event link may be invalid or the event has been removed.</p>
+        </div>
+      </div>
+    );
+  }
 
   // Format date and time from event.date ISO string
   const eventDate = new Date(event.date);
@@ -142,9 +349,6 @@ export default function EventGuestPage() {
   const locationStr = [event.location.name, event.location.city, event.location.state].filter(Boolean).join(", ");
   const fullAddress = [event.location.address, event.location.city, event.location.state].filter(Boolean).join(", ");
   const mapsQuery = encodeURIComponent(fullAddress || locationStr);
-
-  // Schedule from eventPlan if available
-  const schedule = eventPlan?.schedule ?? [];
 
   // Build FAQ from actual event data
   const faq = [
@@ -160,10 +364,6 @@ export default function EventGuestPage() {
       q: "How do I use my ticket?",
       a: "Your ticket QR code will be in the confirmation email. At check-in, simply show the QR code on your phone — no app download needed.",
     },
-    eventPlan?.dietaryNotes ? {
-      q: "What food will be available?",
-      a: eventPlan.dietaryNotes,
-    } : null,
     event.location.parkingInfo ? {
       q: "Is there parking?",
       a: event.location.parkingInfo,
@@ -234,6 +434,40 @@ export default function EventGuestPage() {
             </div>
           ) : (
             <div className="space-y-4">
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">Your Name</label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Full name"
+                    className="w-full px-3 py-2.5 rounded-xl border border-border bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">Email Address</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="w-full px-3 py-2.5 rounded-xl border border-border bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
+                    Your Location <span className="normal-case font-normal text-muted-foreground">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    placeholder="City, State"
+                    className="w-full px-3 py-2.5 rounded-xl border border-border bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+              </div>
               <div>
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">Meal Preference</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -252,9 +486,17 @@ export default function EventGuestPage() {
                   ))}
                 </div>
               </div>
-              <button onClick={handleRSVP} className="btn-primary w-full justify-center py-3 text-sm">
-                Confirm My Spot
-                <ArrowRight className="w-4 h-4" />
+              <button
+                onClick={handleRSVP}
+                disabled={submitting}
+                className="btn-primary w-full justify-center py-3 text-sm disabled:opacity-60"
+              >
+                {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : (
+                  <>
+                    Confirm My Spot
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </button>
             </div>
           )}
@@ -282,86 +524,14 @@ export default function EventGuestPage() {
           ))}
         </div>
 
-        {/* Schedule / Agenda */}
-        {schedule.length > 0 && (
-          <div>
-            <h2 className="text-xl font-bold font-display text-foreground mb-5">Event Schedule</h2>
-            <div className="space-y-1">
-              {schedule.map((item, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: -12 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.06 }}
-                  className="flex items-start gap-4 py-3 border-b border-border last:border-0"
-                >
-                  <span className="text-xs font-mono text-brand-600 w-16 flex-shrink-0 pt-0.5">{item.time}</span>
-                  <div>
-                    <div className="text-sm font-medium text-foreground">{item.activity}</div>
-                    {item.duration && <div className="text-xs text-muted-foreground mt-0.5">{item.duration}</div>}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Location & directions */}
         {hasLocation && (
-          <div className="space-y-4">
-            <div className="p-5 rounded-xl bg-muted/40 border border-border">
-              <div className="flex items-start justify-between gap-4 mb-3">
-                <div className="flex items-center gap-2">
-                  <Car className="w-4 h-4 text-muted-foreground" />
-                  <h3 className="text-sm font-semibold text-foreground">Getting There</h3>
-                </div>
-                {mapsQuery && (
-                  <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${mapsQuery}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-600 text-white text-xs font-semibold hover:bg-brand-700 transition-colors"
-                  >
-                    <Navigation className="w-3.5 h-3.5" />
-                    Get Directions
-                  </a>
-                )}
-              </div>
-              {fullAddress && (
-                <div className="flex items-center gap-1.5 text-sm text-foreground font-medium mb-2">
-                  <MapPin className="w-3.5 h-3.5 text-muted-foreground" />
-                  {fullAddress}
-                </div>
-              )}
-              {event.location.parkingInfo && (
-                <p className="text-sm text-muted-foreground leading-relaxed">{event.location.parkingInfo}</p>
-              )}
-            </div>
-
-            {/* Map — only show for demo mode where we have real coordinates */}
-            {isDemoMode && event.location.coordinates && (
-              <div className="rounded-xl overflow-hidden border border-border shadow-card aspect-video w-full relative">
-                <iframe
-                  title={`${event.location.name} location`}
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  loading="lazy"
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${event.location.coordinates.lng - 0.02}%2C${event.location.coordinates.lat - 0.008}%2C${event.location.coordinates.lng + 0.02}%2C${event.location.coordinates.lat + 0.008}&layer=mapnik&marker=${event.location.coordinates.lat}%2C${event.location.coordinates.lng}`}
-                />
-                <a
-                  href={`https://www.openstreetmap.org/?mlat=${event.location.coordinates.lat}&mlon=${event.location.coordinates.lng}#map=16/${event.location.coordinates.lat}/${event.location.coordinates.lng}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium bg-white/90 dark:bg-gray-900/90 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:bg-white transition-colors shadow-sm"
-                >
-                  <ExternalLink className="w-3 h-3" />
-                  View larger map
-                </a>
-              </div>
-            )}
-          </div>
+          <DirectionsCard
+            fullAddress={fullAddress}
+            mapsQuery={mapsQuery}
+            coordinates={event.location.coordinates ?? undefined}
+            parkingInfo={event.location.parkingInfo}
+          />
         )}
 
         {/* Voice concierge */}

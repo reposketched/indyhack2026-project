@@ -36,7 +36,7 @@ export default function LandingPage() {
           animate="animate"
         >
           <motion.div variants={fadeIn} className="mb-6 sm:mb-8">
-            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-brand-50 text-brand-700 border border-brand-100 dark:bg-brand-900/30 dark:text-brand-400 dark:border-brand-800/50">
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-brand-50 text-brand-700 border border-brand-100 dark:bg-brand-900/60 dark:text-brand-200 dark:border-brand-700/70">
               <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" />
               AI-powered event planning · Demo mode available
             </span>

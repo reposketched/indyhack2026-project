@@ -16,6 +16,7 @@ import {
   RefreshCw,
   UserPlus,
   LogOut,
+  Share,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEventStore } from "@/lib/store/eventStore";
@@ -28,6 +29,7 @@ const NAV_ITEMS = [
   { href: "/dashboard/vendors", label: "Vendors", icon: Users, badge: "MongoDB" },
   { href: "/dashboard/budget", label: "Budget", icon: DollarSign },
   { href: "/dashboard/operations", label: "Operations", icon: Calendar },
+  { href: "/dashboard/guests", label: "Guests", icon: Users },
   { href: "/dashboard/tickets", label: "Tickets", icon: Ticket, badge: "Solana" },
   { href: "/dashboard/voice", label: "Voice", icon: Mic, badge: "ElevenLabs" },
   { href: "/dashboard/team", label: "Team", icon: UserPlus },
@@ -48,6 +50,21 @@ export function Sidebar() {
     useEventStore.setState({ hasStarted: false });
     toast.success("Logged out");
     router.push("/login");
+  }
+
+  async function handlePublish() {
+    try {
+      await fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(event),
+      });
+      const shareUrl = `${window.location.origin}/event/${event.slug}`;
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Link copied! Event published.");
+    } catch {
+      toast.error("Failed to publish event.");
+    }
   }
 
   const unresolvedCount = insights.filter((i) => !i.isResolved).length;
@@ -124,15 +141,28 @@ export function Sidebar() {
       </nav>
 
       {/* Guest page link */}
-      <div className="px-3 py-3 border-t border-border">
-        <Link
-          href={`/event/${event.slug}`}
-          target="_blank"
-          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-150 group"
+      <div className="px-3 py-3 border-t border-border space-y-1">
+        <button
+          onClick={handlePublish}
+          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium bg-brand-600 text-white hover:bg-brand-700 transition-all duration-150"
+        >
+          <Share className="w-3.5 h-3.5" />
+          <span>Publish & Copy Link</span>
+        </button>
+        <button
+          onClick={async () => {
+            await fetch("/api/events", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(event),
+            }).catch(() => {});
+            window.open(`/event/${event.slug}`, "_blank");
+          }}
+          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-150 group"
         >
           <ExternalLink className="w-3.5 h-3.5 group-hover:text-foreground" />
           <span>Guest Event Page</span>
-        </Link>
+        </button>
       </div>
 
       {/* User */}

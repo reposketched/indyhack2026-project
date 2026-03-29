@@ -123,13 +123,19 @@ export async function generateEventPlan(req: GeminiPlanRequest): Promise<GeminiP
     };
   }
 
-  const systemContext = `You are Eventide's AI event planner. You help organizers plan professional events from natural language descriptions.
-  
+  const systemContext = `You are Com-Plan-ion's AI event planner. You help organizers plan events from natural language descriptions.
+
 Return a JSON object with this structure:
 {
   "plan": { theme, guestCount, date, time, duration, venuePreferences, cateringStyle, dietaryNotes, budget, staffingNeeds, schedule: [{time, activity, duration}], risks: [{risk, mitigation, severity}], nextActions: [], aiSummary },
-  "chatMessage": "conversational response summarizing your analysis"
+  "chatMessage": "conversational response that: (1) summarizes what you've planned so far, (2) lists 2-3 specific follow-up questions to fill in missing details like date, guest count, or budget, and (3) suggests 2-3 immediate next steps the organizer should take"
 }
+
+Rules:
+- For any unknown fields (date, guestCount, budget, etc.), use null in the plan — never guess or make up values
+- Always end chatMessage with at least 2 follow-up questions to gather missing info
+- nextActions should always have at least 3 actionable steps even if details are incomplete
+- aiSummary should describe what is known so far and note what's still TBD
 
 Current event context: ${req.context || "New event"}`;
 

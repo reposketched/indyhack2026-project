@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Hardcoded venue coords — 12120 Brookshire Pkwy, Carmel, IN 46033
-const DEST_LAT = 39.9738;
-const DEST_LON = -86.1258;
+// Default venue coords — overridden by ?dest=lat,lon query param
+const DEFAULT_DEST_LAT = 39.9738;
+const DEFAULT_DEST_LON = -86.1258;
 
 type Mode = "driving" | "cycling" | "walking";
 interface LegResult {
@@ -25,9 +25,9 @@ const OSRM_HOSTS: Record<Mode, { host: string; profile: string }> = {
   walking: { host: "https://routing.openstreetmap.de/routed-foot", profile: "foot"    },
 };
 
-async function fetchOSRM(originLat: number, originLon: number, mode: Mode): Promise<number | null> {
+async function fetchOSRM(originLat: number, originLon: number, destLat: number, destLon: number, mode: Mode): Promise<number | null> {
   const { host, profile } = OSRM_HOSTS[mode];
-  const url = `${host}/route/v1/${profile}/${originLon},${originLat};${DEST_LON},${DEST_LAT}?overview=false`;
+  const url = `${host}/route/v1/${profile}/${originLon},${originLat};${destLon},${destLat}?overview=false`;
   try {
     const res = await fetch(url, { next: { revalidate: 300 } });
     if (!res.ok) return null;
@@ -70,12 +70,25 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Invalid origin coordinates" }, { status: 400 });
   }
 
+  const destParam = req.nextUrl.searchParams.get("dest");
+  let destLat = DEFAULT_DEST_LAT;
+  let destLon = DEFAULT_DEST_LON;
+  if (destParam) {
+    const [dLatStr, dLonStr] = destParam.split(",");
+    const dLat = parseFloat(dLatStr);
+    const dLon = parseFloat(dLonStr);
+    if (!isNaN(dLat) && !isNaN(dLon)) {
+      destLat = dLat;
+      destLon = dLon;
+    }
+  }
+
   const modes: Mode[] = ["driving", "cycling", "walking"];
   const results: LegResult[] = [];
 
   await Promise.all(
     modes.map(async (mode) => {
-      const seconds = await fetchOSRM(lat, lon, mode);
+      const seconds = await fetchOSRM(lat, lon, destLat, destLon, mode);
       if (seconds !== null && seconds < 43200) {
         results.push({ mode, durationText: formatDuration(seconds), durationSeconds: seconds });
       }
@@ -89,9 +102,5 @@ export async function GET(req: NextRequest) {
   results.sort((a, b) => a.durationSeconds - b.durationSeconds);
   const best = pickBest(results);
 
-  return NextResponse.json({
-    best,
-    all: results,
-    destination: "12120 Brookshire Pkwy, Carmel, IN 46033",
-  });
+  return NextResponse.json({ best, all: results });
 }

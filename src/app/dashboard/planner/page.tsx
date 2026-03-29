@@ -72,16 +72,16 @@ function EventPlanPanel({ plan }: { plan: EventPlan }) {
 
       {/* Key fields */}
       <div className="grid grid-cols-2 gap-2">
-        <PlanSection label="Theme" value={plan.theme.split("—")[0].trim()} icon={Sparkles} />
-        <PlanSection label="Guests" value={`${plan.guestCount} people`} icon={Users} />
-        <PlanSection label="Date & Time" value={`${plan.date} · ${plan.time}`} icon={CalendarDays} />
-        <PlanSection label="Duration" value={plan.duration} icon={Clock} />
-        <PlanSection label="Budget" value={formatCurrency(plan.budget)} icon={DollarSign} />
-        <PlanSection label="Catering" value={plan.cateringStyle} icon={Utensils} />
+        <PlanSection label="Theme" value={plan.theme ? plan.theme.split("—")[0].trim() : "TBD"} icon={Sparkles} />
+        <PlanSection label="Guests" value={plan.guestCount ? `${plan.guestCount} people` : "TBD"} icon={Users} />
+        <PlanSection label="Date & Time" value={plan.date || plan.time ? `${plan.date || "TBD"} · ${plan.time || "TBD"}` : "TBD"} icon={CalendarDays} />
+        <PlanSection label="Duration" value={plan.duration || "TBD"} icon={Clock} />
+        <PlanSection label="Budget" value={plan.budget ? formatCurrency(plan.budget) : "TBD"} icon={DollarSign} />
+        <PlanSection label="Catering" value={plan.cateringStyle || "TBD"} icon={Utensils} />
       </div>
 
-      <PlanSection label="Venue" value={plan.venuePreferences} icon={MapPin} />
-      <PlanSection label="Staffing" value={plan.staffingNeeds} icon={Users} />
+      <PlanSection label="Venue" value={plan.venuePreferences || "TBD"} icon={MapPin} />
+      <PlanSection label="Staffing" value={plan.staffingNeeds || "TBD"} icon={Users} />
       {plan.dietaryNotes && (
         <PlanSection label="Dietary Notes" value={plan.dietaryNotes} icon={Shield} />
       )}
