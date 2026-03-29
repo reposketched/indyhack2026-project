@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bell, Zap } from "lucide-react";
 import { useEventStore } from "@/lib/store/eventStore";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
 
 const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
   "/dashboard": { title: "Overview", subtitle: "Event health at a glance" },
@@ -40,6 +41,8 @@ export function TopBar() {
             </span>
           )}
         </button>
+
+        <ThemeToggle />
 
         {/* Demo button */}
         <Link

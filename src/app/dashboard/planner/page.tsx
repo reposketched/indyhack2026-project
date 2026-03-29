@@ -66,8 +66,8 @@ function EventPlanPanel({ plan }: { plan: EventPlan }) {
       </div>
 
       {/* Summary */}
-      <div className="p-4 rounded-xl bg-brand-50 border border-brand-100">
-        <p className="text-sm text-brand-800 leading-relaxed">{plan.aiSummary}</p>
+      <div className="p-4 rounded-xl bg-brand-50 border border-brand-100 dark:bg-brand-900/20 dark:border-brand-800/40">
+        <p className="text-sm text-brand-800 dark:text-brand-300 leading-relaxed">{plan.aiSummary}</p>
       </div>
 
       {/* Key fields */}
@@ -145,8 +145,8 @@ function EventPlanPanel({ plan }: { plan: EventPlan }) {
                   <div key={i} className="px-4 py-3 bg-card">
                     <div className="flex items-center gap-2 mb-1">
                       <span className={cn("text-[10px] font-bold uppercase px-1.5 py-0.5 rounded",
-                        risk.severity === "high" ? "bg-rose-50 text-rose-600" :
-                        risk.severity === "medium" ? "bg-amber-50 text-amber-600" : "bg-muted text-muted-foreground"
+                        risk.severity === "high" ? "bg-rose-50 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400" :
+                        risk.severity === "medium" ? "bg-amber-50 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400" : "bg-muted text-muted-foreground"
                       )}>{risk.severity}</span>
                       <span className="text-xs font-medium text-foreground">{risk.risk}</span>
                     </div>
@@ -160,16 +160,16 @@ function EventPlanPanel({ plan }: { plan: EventPlan }) {
       </div>
 
       {/* Next actions */}
-      <div className="rounded-xl border border-brand-100 bg-brand-50 p-4">
+      <div className="rounded-xl border border-brand-100 bg-brand-50 dark:border-brand-800/40 dark:bg-brand-900/20 p-4">
         <div className="flex items-center gap-2 mb-3">
-          <ListChecks className="w-4 h-4 text-brand-600" />
-          <span className="text-xs font-semibold text-brand-700 uppercase tracking-wider">Next Actions</span>
+          <ListChecks className="w-4 h-4 text-brand-600 dark:text-brand-400" />
+          <span className="text-xs font-semibold text-brand-700 dark:text-brand-400 uppercase tracking-wider">Next Actions</span>
         </div>
         <div className="space-y-1.5">
           {plan.nextActions.map((action, i) => (
             <div key={i} className="flex items-start gap-2">
-              <div className="w-4 h-4 rounded-full border-2 border-brand-300 flex-shrink-0 mt-0.5" />
-              <span className="text-xs text-brand-800">{action}</span>
+              <div className="w-4 h-4 rounded-full border-2 border-brand-300 dark:border-brand-700 flex-shrink-0 mt-0.5" />
+              <span className="text-xs text-brand-800 dark:text-brand-300">{action}</span>
             </div>
           ))}
         </div>
@@ -424,9 +424,9 @@ export default function PlannerPage() {
               </AnimatePresence>
             </div>
           ) : (
-            <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-50 border border-emerald-100">
-              <Lightbulb className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-              <p className="text-xs text-emerald-700">No active conflicts — Gemini is monitoring your event.</p>
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-50 border border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800/40">
+              <Lightbulb className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+              <p className="text-xs text-emerald-700 dark:text-emerald-400">No active conflicts — Gemini is monitoring your event.</p>
             </div>
           )}
         </div>

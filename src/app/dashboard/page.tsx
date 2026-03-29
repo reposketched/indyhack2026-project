@@ -15,10 +15,10 @@ import { DEMO_TIMELINE_ITEMS } from "@/lib/data/budgets";
 import { AnimatePresence } from "framer-motion";
 
 const QUICK_ACTIONS = [
-  { label: "Chat with AI", href: "/dashboard/planner", icon: Brain, color: "bg-brand-50 text-brand-600", desc: "Continue planning" },
-  { label: "Search Vendors", href: "/dashboard/vendors", icon: Users, color: "bg-emerald-50 text-emerald-600", desc: "Find vendors" },
-  { label: "View Budget", href: "/dashboard/budget", icon: DollarSign, color: "bg-amber-50 text-amber-600", desc: "Track spending" },
-  { label: "Mint Tickets", href: "/dashboard/tickets", icon: Ticket, color: "bg-violet-50 text-violet-600", desc: "Solana NFTs" },
+  { label: "Chat with AI", href: "/dashboard/planner", icon: Brain, color: "bg-brand-50 text-brand-600 dark:bg-brand-900/40 dark:text-brand-400", desc: "Continue planning" },
+  { label: "Search Vendors", href: "/dashboard/vendors", icon: Users, color: "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400", desc: "Find vendors" },
+  { label: "View Budget", href: "/dashboard/budget", icon: DollarSign, color: "bg-amber-50 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400", desc: "Track spending" },
+  { label: "Mint Tickets", href: "/dashboard/tickets", icon: Ticket, color: "bg-violet-50 text-violet-600 dark:bg-violet-900/40 dark:text-violet-400", desc: "Solana NFTs" },
 ];
 
 export default function DashboardPage() {
@@ -79,8 +79,8 @@ export default function DashboardPage() {
           value={event.confirmedGuests}
           subValue={`of ${event.guestCount} invited · ${guestPct}% RSVPed`}
           icon={Users}
-          iconColor="text-brand-600"
-          iconBg="bg-brand-50"
+          iconColor="text-brand-600 dark:text-brand-400"
+          iconBg="bg-brand-50 dark:bg-brand-900/40"
           trend="up"
           trendValue="+12 this week"
           delay={0}
@@ -90,8 +90,8 @@ export default function DashboardPage() {
           value={`${budgetUsedPct}%`}
           subValue={`${formatCurrency(projectedSpend)} committed of ${formatCurrency(totalBudget)}`}
           icon={DollarSign}
-          iconColor="text-amber-600"
-          iconBg="bg-amber-50"
+          iconColor="text-amber-600 dark:text-amber-400"
+          iconBg="bg-amber-50 dark:bg-amber-900/40"
           trend={budgetUsedPct > 90 ? "down" : "neutral"}
           trendValue={budgetUsedPct > 90 ? "Tight budget" : "On track"}
           delay={0.05}
@@ -101,8 +101,8 @@ export default function DashboardPage() {
           value={unresolvedInsights.length}
           subValue={`${insights.filter(i => i.isResolved).length} resolved`}
           icon={AlertTriangle}
-          iconColor={unresolvedInsights.length > 0 ? "text-rose-600" : "text-emerald-600"}
-          iconBg={unresolvedInsights.length > 0 ? "bg-rose-50" : "bg-emerald-50"}
+          iconColor={unresolvedInsights.length > 0 ? "text-rose-600 dark:text-rose-400" : "text-emerald-600 dark:text-emerald-400"}
+          iconBg={unresolvedInsights.length > 0 ? "bg-rose-50 dark:bg-rose-900/40" : "bg-emerald-50 dark:bg-emerald-900/40"}
           delay={0.1}
         />
         <StatCard
@@ -110,8 +110,8 @@ export default function DashboardPage() {
           value={Math.max(0, Math.floor((new Date(event.date).getTime() - Date.now()) / 86400000))}
           subValue={formatDate(event.date, "short")}
           icon={Clock}
-          iconColor="text-violet-600"
-          iconBg="bg-violet-50"
+          iconColor="text-violet-600 dark:text-violet-400"
+          iconBg="bg-violet-50 dark:bg-violet-900/40"
           delay={0.15}
         />
       </div>
@@ -164,12 +164,12 @@ export default function DashboardPage() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="flex items-center gap-3 p-4 rounded-xl bg-emerald-50 border border-emerald-100"
+                  className="flex items-center gap-3 p-4 rounded-xl bg-emerald-50 border border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800/40"
                 >
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                   <div>
-                    <div className="text-sm font-semibold text-emerald-700">All clear — no active alerts</div>
-                    <div className="text-xs text-emerald-600 opacity-80">Gemini is monitoring your event for conflicts</div>
+                    <div className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">All clear — no active alerts</div>
+                    <div className="text-xs text-emerald-600 dark:text-emerald-500 opacity-80">Gemini is monitoring your event for conflicts</div>
                   </div>
                 </motion.div>
               )}
@@ -277,10 +277,10 @@ export default function DashboardPage() {
       >
         <span className="text-xs text-muted-foreground font-medium">Powered by:</span>
         {[
-          { name: "Gemini AI", color: "text-brand-600 bg-brand-50 border-brand-100" },
-          { name: "MongoDB Atlas", color: "text-emerald-600 bg-emerald-50 border-emerald-100" },
-          { name: "Solana", color: "text-violet-600 bg-violet-50 border-violet-100" },
-          { name: "ElevenLabs", color: "text-amber-600 bg-amber-50 border-amber-100" },
+          { name: "Gemini AI", color: "text-brand-600 bg-brand-50 border-brand-100 dark:text-brand-400 dark:bg-brand-900/30 dark:border-brand-800/50" },
+          { name: "MongoDB Atlas", color: "text-emerald-600 bg-emerald-50 border-emerald-100 dark:text-emerald-400 dark:bg-emerald-900/30 dark:border-emerald-800/50" },
+          { name: "Solana", color: "text-violet-600 bg-violet-50 border-violet-100 dark:text-violet-400 dark:bg-violet-900/30 dark:border-violet-800/50" },
+          { name: "ElevenLabs", color: "text-amber-600 bg-amber-50 border-amber-100 dark:text-amber-400 dark:bg-amber-900/30 dark:border-amber-800/50" },
         ].map(({ name, color }) => (
           <span key={name} className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${color}`}>
             <Zap className="w-3 h-3" />

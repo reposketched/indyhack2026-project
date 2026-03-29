@@ -11,7 +11,7 @@ import {
   Calendar,
   Ticket,
   Mic,
-  Sparkles,
+  Send,
   ExternalLink,
   ChevronRight,
 } from "lucide-react";
@@ -40,7 +40,7 @@ export function Sidebar() {
       <div className="px-5 py-5 border-b border-border">
         <Link href="/" className="flex items-center gap-2.5 group">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-glow-sm group-hover:shadow-glow transition-shadow">
-            <Sparkles className="w-4 h-4 text-white" />
+            <Send className="w-4 h-4 text-white" />
           </div>
           <span className="text-sm font-bold font-display text-foreground">Com-Plan-ion</span>
         </Link>
@@ -69,14 +69,14 @@ export function Sidebar() {
               className={cn(
                 "relative flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 group",
                 isActive
-                  ? "bg-brand-50 text-brand-700"
+                  ? "bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
               {isActive && (
                 <motion.div
                   layoutId="sidebar-active"
-                  className="absolute inset-0 rounded-lg bg-brand-50"
+                  className="absolute inset-0 rounded-lg bg-brand-50 dark:bg-brand-900/40"
                   transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
                 />
               )}

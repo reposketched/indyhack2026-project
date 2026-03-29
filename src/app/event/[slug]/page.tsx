@@ -1,16 +1,59 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   MapPin, Calendar, Clock, Users, Utensils, Mic,
   ChevronDown, ChevronUp, CheckCircle2, Sparkles,
-  Car, Phone, ArrowRight, Ticket,
+  Car, ArrowRight, Ticket, Navigation, Footprints,
+  Bike, Bus, ExternalLink, Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { DEMO_EVENT } from "@/lib/data/events";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+
+const VENUE_ADDRESS = "12120 Brookshire Pkwy, Carmel, IN 46033";
+const VENUE_MAPS_QUERY = encodeURIComponent(VENUE_ADDRESS);
+
+// OpenStreetMap embed — no API key, no billing, 100% free
+// Centered on 12120 Brookshire Pkwy, Carmel, IN 46033 (coords: 39.9738, -86.1258)
+const OSM_EMBED_URL =
+  "https://www.openstreetmap.org/export/embed.html?bbox=-86.145%2C39.966%2C-86.108%2C39.982&layer=mapnik&marker=39.9738%2C-86.1258";
+const OSM_LINK_URL =
+  "https://www.openstreetmap.org/?mlat=39.9738&mlon=-86.1258#map=16/39.9738/-86.1258";
+
+type TravelMode = "driving" | "walking" | "bicycling" | "cycling" | "transit";
+interface TravelResult {
+  mode: TravelMode;
+  durationText: string;
+  durationSeconds: number;
+}
+
+const MODE_ICON: Record<string, React.ElementType> = {
+  driving: Car,
+  walking: Footprints,
+  cycling: Bike,
+  bicycling: Bike,
+  transit: Bus,
+};
+
+const MODE_LABEL: Record<string, string> = {
+  driving: "Drive",
+  walking: "Walk",
+  cycling: "Bike",
+  bicycling: "Bike",
+  transit: "Transit",
+};
+
+// Maps OSRM mode → Google Maps travelmode param
+const MODE_GMAPS: Record<string, string> = {
+  driving: "driving",
+  walking: "walking",
+  cycling: "bicycling",
+  bicycling: "bicycling",
+  transit: "transit",
+};
 
 const AGENDA = [
   { time: "5:00 PM", activity: "Arrival & Registration", detail: "Welcome drinks at the main lawn", type: "arrival" },
@@ -23,10 +66,10 @@ const AGENDA = [
 ];
 
 const FAQ = [
-  { q: "Is there parking?", a: "Free parking for 300 vehicles in the east field at Meadowbrook Estate. Overflow parking at Westfield Community Center (2 mi) with a complimentary shuttle every 15 minutes." },
+  { q: "Is there parking?", a: "Free parking is available in the main lot and overflow lots at Iron & Ember Events, 12120 Brookshire Pkwy, Carmel. Rideshare drop-off is at the main entrance on Brookshire Pkwy. Bike racks are near the entrance." },
   { q: "What food will be available?", a: "Station-based farm-to-table catering from Harvest & Hearth. 60%+ vegetarian options, a fully vegan station, and a specialty coffee bar. All items are labeled with dietary info." },
   { q: "Can I bring a guest?", a: "Each registration is for one attendee. Contact us at hello@complanion.app if you'd like to add a guest — we'll check availability." },
-  { q: "What if it rains?", a: "Meadowbrook Estate's restored 1920s barn accommodates up to 140 guests as a backup. We'll notify attendees by 3PM on event day if we're moving indoors." },
+  { q: "What if it rains?", a: "Iron & Ember Events has a covered indoor space accommodating up to 140 guests as a backup. We'll notify attendees by 3PM on event day if we're moving indoors." },
   { q: "How do I use my NFT ticket?", a: "Your ticket QR code is in the email you received. At check-in, simply scan it with your phone. The QR code is linked to your Solana NFT — no app download needed." },
   { q: "Is there a dress code?", a: "Smart casual is perfect. It's an outdoor event in September — layer up if you run cold. Comfortable shoes are recommended for the lawn areas." },
 ];
@@ -85,14 +128,14 @@ function ConciergeWidget() {
   };
 
   return (
-    <div className="rounded-2xl border border-brand-100 bg-brand-50 p-6">
+    <div className="rounded-2xl border border-brand-100 bg-brand-50 dark:border-brand-800/40 dark:bg-brand-900/20 p-6">
       <div className="flex items-center gap-3 mb-4">
         <div className="w-10 h-10 rounded-full bg-brand-600 flex items-center justify-center">
           <Mic className="w-5 h-5 text-white" />
         </div>
         <div>
-          <div className="text-sm font-semibold text-brand-900">AI Voice Concierge</div>
-          <div className="text-xs text-brand-600">Powered by ElevenLabs · Ask anything about the event</div>
+          <div className="text-sm font-semibold text-brand-900 dark:text-brand-300">AI Voice Concierge</div>
+          <div className="text-xs text-brand-600 dark:text-brand-400">Powered by ElevenLabs · Ask anything about the event</div>
         </div>
       </div>
       <div className="flex gap-2 mb-4">
@@ -102,7 +145,7 @@ function ConciergeWidget() {
           onChange={(e) => setQuestion(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && ask()}
           placeholder="Ask a question about the event..."
-          className="flex-1 px-4 py-2.5 rounded-xl border border-brand-200 bg-white text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-300"
+          className="flex-1 px-4 py-2.5 rounded-xl border border-brand-200 dark:border-brand-700 bg-white dark:bg-card text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-300 dark:focus:ring-brand-700"
         />
         <button
           onClick={ask}
@@ -120,11 +163,11 @@ function ConciergeWidget() {
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-4 rounded-xl bg-white border border-brand-100"
+          className="p-4 rounded-xl bg-white dark:bg-card border border-brand-100 dark:border-brand-800/40"
         >
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-3.5 h-3.5 text-brand-500" />
-            <span className="text-[10px] font-bold text-brand-600 uppercase tracking-wider">Concierge</span>
+            <span className="text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider">Concierge</span>
           </div>
           <p className="text-sm text-foreground leading-relaxed">{answer}</p>
         </motion.div>
@@ -134,7 +177,7 @@ function ConciergeWidget() {
           <button
             key={q}
             onClick={() => { setQuestion(q); }}
-            className="text-xs px-3 py-1.5 rounded-full bg-white border border-brand-200 text-brand-700 hover:bg-brand-100 transition-colors"
+            className="text-xs px-3 py-1.5 rounded-full bg-white dark:bg-card border border-brand-200 dark:border-brand-700 text-brand-700 dark:text-brand-400 hover:bg-brand-100 dark:hover:bg-brand-900/40 transition-colors"
           >
             {q}
           </button>
@@ -148,6 +191,38 @@ export default function EventGuestPage() {
   const event = DEMO_EVENT;
   const [mealPref, setMealPref] = useState("");
   const [rsvpDone, setRsvpDone] = useState(false);
+  const [travelResults, setTravelResults] = useState<TravelResult[] | null>(null);
+  const [travelLoading, setTravelLoading] = useState(false);
+  const [geoError, setGeoError] = useState(false);
+
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    setTravelLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const origin = `${pos.coords.latitude},${pos.coords.longitude}`;
+        try {
+          const res = await fetch(`/api/directions?origin=${origin}`);
+          const data = await res.json();
+          if (data.all) setTravelResults(data.all as TravelResult[]);
+        } catch {
+          // silently fail — map still shows
+        } finally {
+          setTravelLoading(false);
+        }
+      },
+      () => {
+        setGeoError(true);
+        setTravelLoading(false);
+      },
+      { timeout: 8000 }
+    );
+  }, []);
+
+  // Pick best result: shortest, excluding any that are > 6 hours (unrealistic for local event)
+  const bestResult = travelResults
+    ?.filter((r) => r.durationSeconds < 21600)
+    .sort((a, b) => a.durationSeconds - b.durationSeconds)[0];
 
   const handleRSVP = () => {
     if (!mealPref) { toast.error("Please select a meal preference"); return; }
@@ -201,8 +276,8 @@ export default function EventGuestPage() {
           className="card-base p-6"
         >
           <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center">
-              <Ticket className="w-5 h-5 text-brand-600" />
+            <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-900/40 flex items-center justify-center">
+              <Ticket className="w-5 h-5 text-brand-600 dark:text-brand-400" />
             </div>
             <div>
               <div className="text-base font-semibold text-foreground">RSVP & Ticket</div>
@@ -211,11 +286,11 @@ export default function EventGuestPage() {
           </div>
 
           {rsvpDone ? (
-            <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-50 border border-emerald-100">
-              <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-50 border border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800/40">
+              <CheckCircle2 className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
               <div>
-                <div className="text-sm font-semibold text-emerald-700">You&apos;re confirmed!</div>
-                <div className="text-xs text-emerald-600">Your NFT ticket is being minted. Check your email for the QR code.</div>
+                <div className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">You&apos;re confirmed!</div>
+                <div className="text-xs text-emerald-600 dark:text-emerald-500">Your NFT ticket is being minted. Check your email for the QR code.</div>
               </div>
             </div>
           ) : (
@@ -228,7 +303,7 @@ export default function EventGuestPage() {
                       key={pref}
                       onClick={() => setMealPref(pref)}
                       className={cn("px-3 py-2 rounded-xl border text-xs font-medium capitalize transition-all",
-                        mealPref === pref ? "border-brand-300 bg-brand-50 text-brand-700" : "border-border hover:bg-muted"
+                        mealPref === pref ? "border-brand-300 bg-brand-50 text-brand-700 dark:border-brand-700 dark:bg-brand-900/40 dark:text-brand-400" : "border-border hover:bg-muted"
                       )}
                     >
                       {pref}
@@ -250,7 +325,7 @@ export default function EventGuestPage() {
             { icon: Calendar, label: "Date", value: "September 20, 2025" },
             { icon: Clock, label: "Time", value: "5:00 PM – 10:00 PM" },
             { icon: Users, label: "Guests", value: "200 professionals" },
-            { icon: MapPin, label: "Venue", value: event.location.name },
+            { icon: MapPin, label: "Venue", value: "Iron & Ember Events" },
             { icon: Utensils, label: "Catering", value: "Farm-to-table stations" },
             { icon: Car, label: "Parking", value: "Free · East field" },
           ].map(({ icon: Icon, label, value }) => (
@@ -289,14 +364,106 @@ export default function EventGuestPage() {
           </div>
         </div>
 
-        {/* Parking */}
-        <div className="p-5 rounded-xl bg-muted/40 border border-border">
-          <div className="flex items-center gap-2 mb-3">
-            <Car className="w-4 h-4 text-muted-foreground" />
-            <h3 className="text-sm font-semibold text-foreground">Parking & Directions</h3>
+        {/* Parking + Map */}
+        <div className="space-y-4">
+          <div className="p-5 rounded-xl bg-muted/40 border border-border">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Car className="w-4 h-4 text-muted-foreground" />
+                <h3 className="text-sm font-semibold text-foreground">Parking & Directions</h3>
+              </div>
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${VENUE_MAPS_QUERY}&travelmode=driving`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-600 text-white text-xs font-semibold hover:bg-brand-700 transition-colors"
+              >
+                <Navigation className="w-3.5 h-3.5" />
+                Get Directions
+              </a>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">{event.location.parkingInfo}</p>
+
+            {/* Address + travel time */}
+            <div className="mt-3 flex items-center flex-wrap gap-3">
+              <div className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+                <MapPin className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                {event.location.address}, {event.location.city}, {event.location.state}
+              </div>
+
+              {travelLoading && (
+                <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Calculating distance…
+                </span>
+              )}
+
+              {bestResult && !travelLoading && (() => {
+                const Icon = MODE_ICON[bestResult.mode];
+                return (
+                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/40">
+                    <Icon className="w-3.5 h-3.5" />
+                    {bestResult.durationText} · {MODE_LABEL[bestResult.mode]}
+                  </span>
+                );
+              })()}
+
+              {/* All modes strip */}
+              {travelResults && travelResults.length > 1 && !travelLoading && (
+                <div className="flex flex-wrap gap-1.5 w-full mt-1">
+                  {travelResults
+                    .filter((r) => r.durationSeconds < 21600)
+                    .sort((a, b) => a.durationSeconds - b.durationSeconds)
+                    .map((r) => {
+                      const Icon = MODE_ICON[r.mode];
+                      const isBest = r.mode === bestResult?.mode;
+                      return (
+                        <a
+                          key={r.mode}
+                          href={`https://www.google.com/maps/dir/?api=1&destination=${VENUE_MAPS_QUERY}&travelmode=${MODE_GMAPS[r.mode] ?? "driving"}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={cn(
+                            "flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-medium transition-all border",
+                            isBest
+                              ? "bg-brand-50 text-brand-700 border-brand-200 dark:bg-brand-900/40 dark:text-brand-400 dark:border-brand-800/50"
+                              : "bg-muted text-muted-foreground border-border hover:bg-accent"
+                          )}
+                        >
+                          <Icon className="w-3 h-3" />
+                          {r.durationText}
+                        </a>
+                      );
+                    })}
+                </div>
+              )}
+
+              {geoError && !travelLoading && (
+                <span className="text-xs text-muted-foreground italic">Enable location for travel time</span>
+              )}
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground leading-relaxed">{event.location.parkingInfo}</p>
-          <div className="mt-3 text-sm text-foreground font-medium">{event.location.address}, {event.location.city}, {event.location.state}</div>
+
+          {/* OpenStreetMap embed — free, no API key */}
+          <div className="rounded-xl overflow-hidden border border-border shadow-card aspect-video w-full relative">
+            <iframe
+              title="Venue location — Iron & Ember Events"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              loading="lazy"
+              src={OSM_EMBED_URL}
+            />
+            <a
+              href={OSM_LINK_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium bg-white/90 dark:bg-gray-900/90 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-900 transition-colors shadow-sm"
+            >
+              <ExternalLink className="w-3 h-3" />
+              View larger map
+            </a>
+          </div>
         </div>
 
         {/* Voice concierge */}

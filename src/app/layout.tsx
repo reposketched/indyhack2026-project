@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import "@/styles/globals.css";
 import { Toaster } from "sonner";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -43,17 +44,19 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${plusJakarta.variable} ${jetbrainsMono.variable} font-sans antialiased bg-background text-foreground`}
       >
-        {children}
-        <Toaster
-          position="top-right"
-          expand={false}
-          richColors
-          toastOptions={{
-            classNames: {
-              toast: "font-sans text-sm",
-            },
-          }}
-        />
+        <ThemeProvider>
+          {children}
+          <Toaster
+            position="top-right"
+            expand={false}
+            richColors
+            toastOptions={{
+              classNames: {
+                toast: "font-sans text-sm",
+              },
+            }}
+          />
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -13,7 +13,7 @@ import { sleep } from "@/lib/utils";
 import type { EventPlan, AIInsight, ChatMessage } from "@/lib/schemas";
 import { DEMO_EVENT_PLAN, DEMO_AI_INSIGHTS } from "@/lib/data/events";
 
-const IS_MOCK = process.env.MOCK_MODE === "true" || !process.env.GEMINI_API_KEY;
+const isMock = () => process.env.MOCK_MODE === "true" || !process.env.GEMINI_API_KEY;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -59,7 +59,7 @@ Shall I adjust anything? I remember all previous decisions and can revise any se
 
 **Top pick: Harvest & Hearth Catering** (98% match) — Their farm-to-table philosophy is a perfect fit. 60%+ vegetarian options, live cooking stations, and experience with 200+ guest outdoor events.
 
-**Venue: Meadowbrook Estate** (95% match) — The only venue that truly delivers on the "rustic outdoor" brief. Barn + lawn allows flexible zone setup.
+**Venue: Iron & Ember Events** (95% match) — The only venue that truly delivers on the "rustic outdoor" brief. Indoor/outdoor flexibility allows for separate networking zones.
 
 Want me to compare any two vendors in detail, or should I generate a vendor email template?`,
 
@@ -83,7 +83,7 @@ function getMockChatResponse(message: string): string {
 
 async function callGeminiReal(prompt: string, systemContext: string): Promise<string> {
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${process.env.GEMINI_API_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -113,7 +113,8 @@ async function callGeminiReal(prompt: string, systemContext: string): Promise<st
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 export async function generateEventPlan(req: GeminiPlanRequest): Promise<GeminiPlanResponse> {
-  if (IS_MOCK) {
+  console.log("[Gemini] generateEventPlan — isMock:", isMock(), "| key present:", !!process.env.GEMINI_API_KEY, "| MOCK_MODE:", process.env.MOCK_MODE);
+  if (isMock()) {
     await sleep(1500);
     return {
       plan: DEMO_EVENT_PLAN,
@@ -158,7 +159,7 @@ Current event context: ${req.context || "New event"}`;
 export async function chatWithGemini(req: GeminiChatRequest): Promise<string> {
   const lastMessage = req.messages[req.messages.length - 1];
 
-  if (IS_MOCK) {
+  if (isMock()) {
     await sleep(800 + Math.random() * 600);
     return getMockChatResponse(lastMessage?.content || "");
   }
@@ -175,7 +176,7 @@ Be concise, specific, and actionable. Reference previous decisions when relevant
 }
 
 export async function detectConflicts(eventContext: string): Promise<AIInsight[]> {
-  if (IS_MOCK) {
+  if (isMock()) {
     await sleep(600);
     return DEMO_AI_INSIGHTS;
   }

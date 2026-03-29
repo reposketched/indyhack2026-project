@@ -14,9 +14,9 @@ import { formatCurrency, cn } from "@/lib/utils";
 import { CATEGORY_COLORS } from "@/lib/data/budgets";
 
 const AI_RECOMMENDATIONS = [
-  { icon: AlertTriangle, colorClass: "text-rose-600", bg: "bg-rose-50 border-rose-100", title: "Contingency too low", body: "Current contingency is $300 (3.75%). Reduce decor from $950 to $550 to create a $700 buffer.", impact: "-$400 decor, +$400 contingency" },
-  { icon: Lightbulb, colorClass: "text-brand-600", bg: "bg-brand-50 border-brand-100", title: "If you swap to Solstice Market Collective", body: "Solstice Market at $28/head saves $2,000 for 200 guests. Still vegetarian-forward.", impact: "-$2,000 catering" },
-  { icon: TrendingUp, colorClass: "text-emerald-600", bg: "bg-emerald-50 border-emerald-100", title: "RSVP growth may push catering over", body: "At current RSVP velocity, you will hit 185-200 guests. Budget for 210 to give caterer notice.", impact: "+$760 catering (contingent)" },
+  { icon: AlertTriangle, colorClass: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 border-rose-100 dark:bg-rose-900/20 dark:border-rose-800/40", title: "Contingency too low", body: "Current contingency is $300 (3.75%). Reduce decor from $950 to $550 to create a $700 buffer.", impact: "-$400 decor, +$400 contingency" },
+  { icon: Lightbulb, colorClass: "text-brand-600 dark:text-brand-400", bg: "bg-brand-50 border-brand-100 dark:bg-brand-900/20 dark:border-brand-800/40", title: "If you swap to Solstice Market Collective", body: "Solstice Market at $28/head saves $2,000 for 200 guests. Still vegetarian-forward.", impact: "-$2,000 catering" },
+  { icon: TrendingUp, colorClass: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800/40", title: "RSVP growth may push catering over", body: "At current RSVP velocity, you will hit 185-200 guests. Budget for 210 to give caterer notice.", impact: "+$760 catering (contingent)" },
   { icon: Info, colorClass: "text-muted-foreground", bg: "bg-muted border-border", title: "Photography deposit due Sep 13", body: "Golden Hour Studios balance of $1,800 due September 13th. Mark as paid in operations.", impact: "$1,800 due in 46 days" },
 ];
 
@@ -62,10 +62,10 @@ export default function BudgetPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Budget", value: formatCurrency(totalBudget), sub: "Hard cap", icon: DollarSign, color: "text-brand-600", bg: "bg-brand-50" },
-          { label: "Projected Spend", value: formatCurrency(projectedSpend), sub: `${budgetPct}% of budget`, icon: TrendingUp, color: budgetPct > 90 ? "text-rose-600" : "text-amber-600", bg: budgetPct > 90 ? "bg-rose-50" : "bg-amber-50" },
-          { label: "Paid to Date", value: formatCurrency(actualSpend), sub: `${Math.round((actualSpend / projectedSpend) * 100)}% of committed`, icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50" },
-          { label: "Remaining", value: formatCurrency(remaining), sub: remaining < 500 ? "Dangerously low" : "Available buffer", icon: remaining < 500 ? AlertTriangle : DollarSign, color: remaining < 500 ? "text-rose-600" : "text-emerald-600", bg: remaining < 500 ? "bg-rose-50" : "bg-emerald-50" },
+          { label: "Total Budget", value: formatCurrency(totalBudget), sub: "Hard cap", icon: DollarSign, color: "text-brand-600 dark:text-brand-400", bg: "bg-brand-50 dark:bg-brand-900/40" },
+          { label: "Projected Spend", value: formatCurrency(projectedSpend), sub: `${budgetPct}% of budget`, icon: TrendingUp, color: budgetPct > 90 ? "text-rose-600 dark:text-rose-400" : "text-amber-600 dark:text-amber-400", bg: budgetPct > 90 ? "bg-rose-50 dark:bg-rose-900/40" : "bg-amber-50 dark:bg-amber-900/40" },
+          { label: "Paid to Date", value: formatCurrency(actualSpend), sub: `${Math.round((actualSpend / projectedSpend) * 100)}% of committed`, icon: CheckCircle2, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-900/40" },
+          { label: "Remaining", value: formatCurrency(remaining), sub: remaining < 500 ? "Dangerously low" : "Available buffer", icon: remaining < 500 ? AlertTriangle : DollarSign, color: remaining < 500 ? "text-rose-600 dark:text-rose-400" : "text-emerald-600 dark:text-emerald-400", bg: remaining < 500 ? "bg-rose-50 dark:bg-rose-900/40" : "bg-emerald-50 dark:bg-emerald-900/40" },
         ].map(({ label, value, sub, icon: Icon, color, bg }, i) => (
           <motion.div key={label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="card-base p-5">
             <div className="flex items-start justify-between mb-3">

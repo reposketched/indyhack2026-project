@@ -68,13 +68,13 @@ function VendorCard({
   const [expanded, setExpanded] = useState(false);
 
   const categoryColorMap: Record<string, string> = {
-    catering: "bg-emerald-50 text-emerald-600",
-    venue: "bg-brand-50 text-brand-600",
-    photography: "bg-violet-50 text-violet-600",
-    entertainment: "bg-rose-50 text-rose-600",
-    decor: "bg-amber-50 text-amber-600",
-    staffing: "bg-cyan-50 text-cyan-600",
-    technology: "bg-indigo-50 text-indigo-600",
+    catering: "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400",
+    venue: "bg-brand-50 text-brand-600 dark:bg-brand-900/40 dark:text-brand-400",
+    photography: "bg-violet-50 text-violet-600 dark:bg-violet-900/40 dark:text-violet-400",
+    entertainment: "bg-rose-50 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400",
+    decor: "bg-amber-50 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400",
+    staffing: "bg-cyan-50 text-cyan-600 dark:bg-cyan-900/40 dark:text-cyan-400",
+    technology: "bg-indigo-50 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400",
   };
 
   const catColor = categoryColorMap[vendor.category] || "bg-muted text-muted-foreground";
@@ -107,7 +107,7 @@ function VendorCard({
               className={cn(
                 "flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all",
                 isShortlisted
-                  ? "bg-brand-50 text-brand-600 border border-brand-100"
+                  ? "bg-brand-50 text-brand-600 border border-brand-100 dark:bg-brand-900/40 dark:text-brand-400 dark:border-brand-800/50"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground border border-transparent"
               )}
             >
@@ -158,12 +158,12 @@ function VendorCard({
       </div>
 
       {/* AI reasoning */}
-      <div className="p-3 rounded-lg bg-brand-50 border border-brand-100 mb-4">
+      <div className="p-3 rounded-lg bg-brand-50 border border-brand-100 dark:bg-brand-900/20 dark:border-brand-800/40 mb-4">
         <div className="flex items-center gap-1.5 mb-1">
-          <Sparkles className="w-3 h-3 text-brand-500" />
-          <span className="text-[10px] font-semibold text-brand-600 uppercase tracking-wider">AI Reasoning</span>
+          <Sparkles className="w-3 h-3 text-brand-500 dark:text-brand-400" />
+          <span className="text-[10px] font-semibold text-brand-600 dark:text-brand-400 uppercase tracking-wider">AI Reasoning</span>
         </div>
-        <p className="text-xs text-brand-800 leading-relaxed">
+        <p className="text-xs text-brand-800 dark:text-brand-300 leading-relaxed">
           {expanded ? vendor.aiReasoning : vendor.aiReasoning.slice(0, 120) + (vendor.aiReasoning.length > 120 ? "..." : "")}
         </p>
         {vendor.aiReasoning.length > 120 && (
@@ -192,7 +192,7 @@ function VendorCard({
           className={cn("flex-1 text-xs py-1.5 rounded-lg font-medium transition-all",
             isShortlisted
               ? "bg-brand-600 text-white hover:bg-brand-700"
-              : "bg-brand-50 text-brand-700 border border-brand-100 hover:bg-brand-100"
+              : "bg-brand-50 text-brand-700 border border-brand-100 hover:bg-brand-100 dark:bg-brand-900/30 dark:text-brand-400 dark:border-brand-800/50 dark:hover:bg-brand-900/50"
           )}
         >
           {isShortlisted ? <CheckCircle2 className="w-3.5 h-3.5 inline mr-1" /> : null}
@@ -388,15 +388,15 @@ export default function VendorsPage() {
       </div>
 
       {/* MongoDB badge */}
-      <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-50 border border-emerald-100">
-        <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center">
-          <Database className="w-3.5 h-3.5 text-emerald-600" />
+      <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-50 border border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800/40">
+        <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/60 flex items-center justify-center">
+          <Database className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
         </div>
         <div className="flex-1">
-          <span className="text-xs font-semibold text-emerald-700">MongoDB Atlas Vector Search</span>
-          <span className="text-xs text-emerald-600 ml-2">· Vendor embeddings indexed with text-embedding-004 · cosine similarity</span>
+          <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">MongoDB Atlas Vector Search</span>
+          <span className="text-xs text-emerald-600 dark:text-emerald-500 ml-2">· Vendor embeddings indexed with text-embedding-004 · cosine similarity</span>
         </div>
-        <span className="text-xs text-emerald-600 font-mono">{filteredVendors.length} results</span>
+        <span className="text-xs text-emerald-600 dark:text-emerald-500 font-mono">{filteredVendors.length} results</span>
       </div>
 
       {/* Category filters */}
@@ -433,7 +433,7 @@ export default function VendorsPage() {
             {displayVendors
               .filter((v) => shortlistedVendors.includes(v._id || ""))
               .map((v) => (
-                <div key={v._id} className="flex-shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-50 border border-brand-100 text-xs text-brand-700">
+                <div key={v._id} className="flex-shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-50 border border-brand-100 text-xs text-brand-700 dark:bg-brand-900/40 dark:border-brand-800/50 dark:text-brand-400">
                   <CheckCircle2 className="w-3 h-3" />
                   {v.name}
                 </div>

@@ -180,12 +180,12 @@ export default function VoicePage() {
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-2.5 p-3 rounded-xl bg-amber-50 border border-amber-100 mb-4"
+                className="flex items-center gap-2.5 p-3 rounded-xl bg-amber-50 border border-amber-100 dark:bg-amber-900/20 dark:border-amber-800/40 mb-4"
               >
-                <RadioTower className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                <RadioTower className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
                 <div>
-                  <div className="text-xs font-semibold text-amber-700">Organizer Voice Mode</div>
-                  <div className="text-[11px] text-amber-600">Guests hear the concierge in your cloned voice via ElevenLabs Voice Lab</div>
+                  <div className="text-xs font-semibold text-amber-700 dark:text-amber-400">Organizer Voice Mode</div>
+                  <div className="text-[11px] text-amber-600 dark:text-amber-500">Guests hear the concierge in your cloned voice via ElevenLabs Voice Lab</div>
                 </div>
               </motion.div>
             )}
@@ -217,7 +217,7 @@ export default function VoicePage() {
                   className={cn(
                     "flex items-center gap-3 p-3 rounded-xl border text-left transition-all",
                     (cloneMode ? "organizer-clone" : selectedVoice) === voice.id
-                      ? "border-brand-300 bg-brand-50"
+                      ? "border-brand-300 bg-brand-50 dark:border-brand-700 dark:bg-brand-900/40"
                       : "border-border hover:bg-muted/40"
                   )}
                 >
@@ -318,9 +318,9 @@ export default function VoicePage() {
           </div>
 
           {/* ElevenLabs info */}
-          <div className="mt-4 p-4 rounded-xl bg-orange-50 border border-orange-100">
-            <div className="text-xs font-semibold text-orange-700 mb-2">ElevenLabs Integration (for judges)</div>
-            <div className="text-[11px] text-orange-700 space-y-1 leading-relaxed">
+          <div className="mt-4 p-4 rounded-xl bg-orange-50 border border-orange-100 dark:bg-orange-900/20 dark:border-orange-800/40">
+            <div className="text-xs font-semibold text-orange-700 dark:text-orange-400 mb-2">ElevenLabs Integration (for judges)</div>
+            <div className="text-[11px] text-orange-700 dark:text-orange-400 space-y-1 leading-relaxed">
               <div>• Real mode: ElevenLabs turbo_v2 model</div>
               <div>• Voice cloning via ElevenLabs Voice Lab</div>
               <div>• Mock mode: Browser Web Speech API</div>

@@ -58,7 +58,7 @@ const EVENT_ANSWERS: Record<string, string> = {
     "The event starts at 5 PM on September 20th. Doors open at 4:45 for early arrivals. The main networking hour runs from 5:30 to 6:30, and our featured speaker starts at 8:30 PM.",
 
   "Where do I park?":
-    "Free parking is available in the east field at Meadowbrook Estate — there's space for about 300 vehicles. If that fills up, overflow parking is at the Westfield Community Center, about 2 miles away, with a complimentary shuttle running every 15 minutes. Rideshare drop-off is at the main gate on Orchard Ridge Lane.",
+    "Free parking is available in the main lot at Iron & Ember Events — 12120 Brookshire Pkwy, Carmel, IN. Overflow lots are also on-site. Rideshare drop-off is at the main entrance on Brookshire Pkwy. Bike racks are available near the entrance.",
 
   "Can I change my meal preference?":
     `You can update your meal preference until September 13th by visiting the event page at complanion.app/event/${DEMO_EVENT.slug}. After that, changes may not be guaranteed, but reach out to us directly and we'll do our best. Harvest & Hearth has excellent options across all dietary needs.`,

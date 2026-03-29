@@ -11,13 +11,13 @@ export const DEMO_EVENT: Event = {
   date: "2025-09-20T17:00:00.000Z",
   endDate: "2025-09-20T22:00:00.000Z",
   location: {
-    name: "Meadowbrook Estate",
-    address: "4821 Orchard Ridge Ln",
-    city: "Westfield",
+    name: "Iron & Ember Events",
+    address: "12120 Brookshire Pkwy",
+    city: "Carmel",
     state: "IN",
-    coordinates: { lat: 40.0456, lng: -86.1276 },
+    coordinates: { lat: 39.9738, lng: -86.1258 },
     parkingInfo:
-      "Free parking for 300 vehicles in the east field. Overflow parking with shuttles from Westfield Community Center, 2 miles away. Rideshare drop-off at the main gate.",
+      "Free parking available in the main lot and overflow lots on-site. Rideshare drop-off at the main entrance on Brookshire Pkwy. Bike racks available near the entrance.",
   },
   guestCount: 200,
   confirmedGuests: 147,
@@ -34,13 +34,13 @@ export const DEMO_EVENT_MEMORY: EventMemory = {
   _id: "memory_demo_001",
   eventId: "event_demo_001",
   context:
-    "Rustic outdoor networking event for 200 tech and creative professionals in Westfield, IN. September 20, 2025. Budget $8,000. Organizer specifically requested: vegetarian-friendly catering, warm Google-level aesthetic, outdoor setting with natural elements. Confirmed venue: Meadowbrook Estate. Preferred vendor palette: Harvest & Hearth (catering), Roots & Stems (decor), Golden Hour Studios (photography).",
+    "Rustic outdoor networking event for 200 tech and creative professionals in Carmel, IN. September 20, 2025. Budget $8,000. Organizer specifically requested: vegetarian-friendly catering, warm Google-level aesthetic, outdoor setting with natural elements. Confirmed venue: Iron & Ember Events. Preferred vendor palette: Harvest & Hearth (catering), Roots & Stems (decor), Golden Hour Studios (photography).",
   decisions: [
     {
       timestamp: "2025-07-15T10:30:00.000Z",
-      decision: "Venue selection: Meadowbrook Estate over The Canopy Collective",
+      decision: "Venue selection: Iron & Ember Events over The Canopy Collective",
       reasoning:
-        "Meadowbrook provides the authentic rustic outdoor setting the organizer specified. The barn + open lawn combination allows for separate networking zones. Canopy Collective, while central, felt too urban for the warmth requested.",
+        "Iron & Ember provides the authentic rustic outdoor setting the organizer specified. The indoor/outdoor combination allows for separate networking zones. Canopy Collective, while central, felt too urban for the warmth requested.",
       madeBy: "organizer",
     },
     {
@@ -99,7 +99,7 @@ export const DEMO_AI_INSIGHTS: AIInsight[] = [
     eventId: "event_demo_001",
     type: "conflict",
     title: "Catering deposit deadline conflicts with venue contract signing",
-    body: "Harvest & Hearth requires a 30% deposit by August 15th, but your venue contract with Meadowbrook Estate isn't finalized until August 18th. If the venue falls through, you'll lose $2,280 in non-refundable catering deposit. Recommend negotiating a 5-day extension with Harvest & Hearth or finalizing venue by August 12th.",
+    body: "Harvest & Hearth requires a 30% deposit by August 15th, but your venue contract with Iron & Ember Events isn't finalized until August 18th. If the venue falls through, you'll lose $2,280 in non-refundable catering deposit. Recommend negotiating a 5-day extension with Harvest & Hearth or finalizing venue by August 12th.",
     severity: "high",
     isResolved: false,
     relatedItems: ["vendor_001", "vendor_003", "timeline_003"],
@@ -178,13 +178,13 @@ export const DEMO_EVENT_PLAN: EventPlan = {
     { time: "10:00 PM", activity: "Event close — coordinated departure", duration: "30 min" },
   ],
   risks: [
-    { risk: "Rain on September 20th", mitigation: "Meadowbrook's barn accommodates 140 guests as primary backup. Canopy & Stars tent rental on standby.", severity: "medium" },
+    { risk: "Rain on September 20th", mitigation: "Iron & Ember's indoor space accommodates 140 guests as primary backup. Canopy & Stars tent rental on standby.", severity: "medium" },
     { risk: "Budget overrun", mitigation: "Trim decor line by $400 to create 8.75% contingency buffer.", severity: "high" },
     { risk: "Catering deposit deadline conflict", mitigation: "Negotiate 5-day extension with Harvest & Hearth or accelerate venue contract signing.", severity: "high" },
     { risk: "Guest count exceeds 200", mitigation: "Harvest & Hearth scales to 225. Alert Apex Staffing 10 days out for headcount adjustment.", severity: "low" },
   ],
   nextActions: [
-    "Sign venue contract with Meadowbrook Estate by August 12th",
+    "Sign venue contract with Iron & Ember Events by August 12th",
     "Confirm catering deposit extension with Harvest & Hearth",
     "Add contingency tent rental as optional line item",
     "Send dietary preference survey to all confirmed guests",

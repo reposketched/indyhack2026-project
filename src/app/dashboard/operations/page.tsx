@@ -21,11 +21,11 @@ const TYPE_ICONS = {
 };
 
 const TYPE_COLORS = {
-  milestone: "text-brand-600 bg-brand-50",
-  deadline: "text-rose-600 bg-rose-50",
+  milestone: "text-brand-600 bg-brand-50 dark:bg-brand-900/40 dark:text-brand-400",
+  deadline: "text-rose-600 bg-rose-50 dark:bg-rose-900/40 dark:text-rose-400",
   task: "text-muted-foreground bg-muted",
-  deposit: "text-amber-600 bg-amber-50",
-  runofshow: "text-violet-600 bg-violet-50",
+  deposit: "text-amber-600 bg-amber-50 dark:bg-amber-900/40 dark:text-amber-400",
+  runofshow: "text-violet-600 bg-violet-50 dark:bg-violet-900/40 dark:text-violet-400",
 };
 
 const PRIORITY_DOT = {
@@ -39,7 +39,7 @@ const LIVE_UPDATES = [
   { time: "2 min ago", message: "Harvest & Hearth confirmed nut-free station setup", type: "success" },
   { time: "15 min ago", message: "RSVP count reached 147 — up 12 this week", type: "info" },
   { time: "1 hr ago", message: "Gemini detected deposit timing conflict — review in AI Planner", type: "warning" },
-  { time: "3 hr ago", message: "Meadowbrook Estate contract sent for signature", type: "info" },
+  { time: "3 hr ago", message: "Iron & Ember Events contract sent for signature", type: "info" },
   { time: "Yesterday", message: "Golden Hour Studios brief scheduled for Sep 10", type: "success" },
 ];
 
@@ -96,7 +96,7 @@ function TimelineItemRow({
           </span>
           <div className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1.5", priorityDot)} />
           {item.priority === "critical" && !isCompleted && (
-            <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-rose-50 text-rose-600">Critical</span>
+            <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-rose-50 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400">Critical</span>
           )}
         </div>
         {item.description && (
@@ -308,8 +308,8 @@ export default function OperationsPage() {
               .filter((t) => t.type === "deposit" && t.status !== "completed")
               .map((item) => (
                 <div key={item._id} className="px-4 py-3 border-b border-border last:border-0 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
-                    <DollarSign className="w-4 h-4 text-amber-600" />
+                  <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-900/40 flex items-center justify-center flex-shrink-0">
+                    <DollarSign className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-xs font-medium text-foreground truncate">{item.title}</div>

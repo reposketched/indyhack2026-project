@@ -14,7 +14,9 @@ import {
   Zap,
   Shield,
   Star,
+  Send,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
 
 const fadeIn = {
   initial: { opacity: 0, y: 24 },
@@ -34,7 +36,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-glow-sm">
-              <Sparkles className="w-4 h-4 text-white" />
+              <Send className="w-4 h-4 text-white" />
             </div>
             <span className="text-base font-bold font-display text-foreground">Com-Plan-ion</span>
           </div>
@@ -44,6 +46,7 @@ export default function LandingPage() {
             <Link href="#sponsors" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Powered by</Link>
           </div>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <Link href="/dashboard" className="btn-secondary text-sm hidden md:flex">
               Dashboard
             </Link>
@@ -71,7 +74,7 @@ export default function LandingPage() {
           animate="animate"
         >
           <motion.div variants={fadeIn}>
-            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-brand-50 text-brand-700 border border-brand-100 mb-8">
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-brand-50 text-brand-700 border border-brand-100 dark:bg-brand-900/30 dark:text-brand-400 dark:border-brand-800/50 mb-8">
               <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" />
               AI-powered event planning · Demo mode available
             </span>
@@ -141,7 +144,7 @@ export default function LandingPage() {
               <div className="w-52 border-r border-border bg-card flex flex-col py-4 gap-1 px-2">
                 <div className="px-3 py-2 flex items-center gap-2.5 mb-2">
                   <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center">
-                    <Sparkles className="w-3.5 h-3.5 text-white" />
+                    <Send className="w-3.5 h-3.5 text-white" />
                   </div>
                   <span className="text-sm font-bold font-display">Com-Plan-ion</span>
                 </div>
@@ -154,7 +157,7 @@ export default function LandingPage() {
                 ].map(({ icon: Icon, label, active }) => (
                   <div
                     key={label}
-                    className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm ${active ? "bg-brand-50 text-brand-700 font-medium" : "text-muted-foreground"}`}
+                    className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm ${active ? "bg-brand-50 text-brand-700 font-medium dark:bg-brand-900/40 dark:text-brand-400" : "text-muted-foreground"}`}
                   >
                     <Icon className="w-4 h-4" />
                     {label}
@@ -205,9 +208,9 @@ export default function LandingPage() {
                         <div className="text-xs font-medium text-foreground">{value}</div>
                       </div>
                     ))}
-                    <div className="bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
-                      <div className="text-[10px] text-amber-600 font-medium">⚠ 2 Conflicts Detected</div>
-                      <div className="text-[10px] text-amber-700 mt-0.5">Deposit timing issue · Budget at 96%</div>
+                    <div className="bg-amber-50 border border-amber-100 dark:bg-amber-900/30 dark:border-amber-800/50 rounded-lg px-3 py-2">
+                      <div className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">⚠ 2 Conflicts Detected</div>
+                      <div className="text-[10px] text-amber-700 dark:text-amber-400 mt-0.5">Deposit timing issue · Budget at 96%</div>
                     </div>
                   </div>
                 </div>
@@ -221,8 +224,8 @@ export default function LandingPage() {
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             className="absolute -right-4 top-12 bg-card border border-border rounded-xl shadow-card-md px-4 py-3 flex items-center gap-3"
           >
-            <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-100 dark:bg-emerald-900/40 dark:border-emerald-800/50 flex items-center justify-center">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
               <div className="text-xs font-semibold text-foreground">Ticket Minted</div>
@@ -235,8 +238,8 @@ export default function LandingPage() {
             transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
             className="absolute -left-4 bottom-16 bg-card border border-border rounded-xl shadow-card-md px-4 py-3 flex items-center gap-3"
           >
-            <div className="w-8 h-8 rounded-full bg-brand-50 border border-brand-100 flex items-center justify-center">
-              <Mic className="w-4 h-4 text-brand-600" />
+            <div className="w-8 h-8 rounded-full bg-brand-50 border border-brand-100 dark:bg-brand-900/40 dark:border-brand-800/50 flex items-center justify-center">
+              <Mic className="w-4 h-4 text-brand-600 dark:text-brand-400" />
             </div>
             <div>
               <div className="text-xs font-semibold text-foreground">Voice Concierge</div>
@@ -296,7 +299,7 @@ export default function LandingPage() {
             {[
               {
                 icon: Brain,
-                color: "bg-brand-50 text-brand-600",
+                color: "bg-brand-50 text-brand-600 dark:bg-brand-900/40 dark:text-brand-400",
                 badge: "Gemini API",
                 title: "AI Planning Workspace",
                 description: "Speak naturally about your event. Gemini transforms your vision into a structured plan with budget breakdowns, schedules, and risk flags — in seconds.",
@@ -304,7 +307,7 @@ export default function LandingPage() {
               },
               {
                 icon: MapPin,
-                color: "bg-emerald-50 text-emerald-600",
+                color: "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400",
                 badge: "MongoDB Atlas",
                 title: "Semantic Vendor Matching",
                 description: "Describe what you want in plain English. MongoDB vector search surfaces the most semantically relevant vendors with AI-generated match reasoning.",
@@ -312,7 +315,7 @@ export default function LandingPage() {
               },
               {
                 icon: DollarSign,
-                color: "bg-amber-50 text-amber-600",
+                color: "bg-amber-50 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400",
                 badge: "AI Intelligence",
                 title: "Budget Intelligence",
                 description: "Real-time budget tracking with predictive analytics. See how vendor choices ripple through your budget before you commit.",
@@ -320,7 +323,7 @@ export default function LandingPage() {
               },
               {
                 icon: Ticket,
-                color: "bg-violet-50 text-violet-600",
+                color: "bg-violet-50 text-violet-600 dark:bg-violet-900/40 dark:text-violet-400",
                 badge: "Solana",
                 title: "NFT Tickets That Work",
                 description: "Compressed NFT tickets with rich metadata — tier, meal preference, dietary restrictions, and proof-of-attendance. Not just collectibles.",
@@ -328,7 +331,7 @@ export default function LandingPage() {
               },
               {
                 icon: Mic,
-                color: "bg-rose-50 text-rose-600",
+                color: "bg-rose-50 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400",
                 badge: "ElevenLabs",
                 title: "Voice Concierge",
                 description: "Every guest gets a natural AI voice concierge that answers questions about schedule, parking, meals, and access — in the organizer's own voice.",
@@ -336,7 +339,7 @@ export default function LandingPage() {
               },
               {
                 icon: Shield,
-                color: "bg-cyan-50 text-cyan-600",
+                color: "bg-cyan-50 text-cyan-600 dark:bg-cyan-900/40 dark:text-cyan-400",
                 badge: "Operations",
                 title: "Timeline & Ops Control",
                 description: "A milestone-driven ops board with real-time updates, deposit deadlines, and a day-of run-of-show — all synced to MongoDB change streams.",
@@ -406,8 +409,8 @@ export default function LandingPage() {
                 transition={{ delay: i * 0.1 }}
                 className="flex gap-5 items-start p-5 rounded-xl bg-card border border-border hover:shadow-card-md transition-all duration-200"
               >
-                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-brand-50 border border-brand-100 flex items-center justify-center">
-                  <Icon className="w-5 h-5 text-brand-600" />
+                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-brand-50 border border-brand-100 dark:bg-brand-900/40 dark:border-brand-800/50 flex items-center justify-center">
+                  <Icon className="w-5 h-5 text-brand-600 dark:text-brand-400" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-1">
@@ -442,7 +445,7 @@ export default function LandingPage() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/demo"
-                  className="inline-flex items-center gap-2 px-7 py-3.5 bg-white text-brand-700 rounded-xl font-semibold text-sm hover:bg-brand-50 transition-colors shadow-lg"
+                  className="inline-flex items-center gap-2 px-7 py-3.5 bg-white dark:bg-white/10 text-brand-700 dark:text-white rounded-xl font-semibold text-sm hover:bg-brand-50 dark:hover:bg-white/20 transition-colors shadow-lg"
                 >
                   <Zap className="w-4 h-4" />
                   Run Hackathon Demo
@@ -465,7 +468,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center">
-              <Sparkles className="w-3.5 h-3.5 text-white" />
+              <Send className="w-3.5 h-3.5 text-white" />
             </div>
             <span className="text-sm font-bold font-display">Com-Plan-ion</span>
           </div>

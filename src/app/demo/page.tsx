@@ -6,8 +6,9 @@ import Link from "next/link";
 import {
   Brain, Users, DollarSign, Ticket, Mic, CheckCircle2,
   ChevronRight, Sparkles, Zap, Play, RotateCcw, ExternalLink,
-  AlertTriangle, Star,
+  AlertTriangle, Star, Send,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { useEventStore } from "@/lib/store/eventStore";
 import { DEMO_EVENT_PLAN } from "@/lib/data/events";
 import { getMockVendorMatches } from "@/lib/data/vendors";
@@ -162,7 +163,7 @@ Shall I adjust anything? I remember all previous decisions.`;
         setCurrentStepIdx(8);
         toast.info("Demo: ElevenLabs voice concierge...", { duration: 2000 });
         const q = "Where do I park?";
-        const a = "Free parking is available in the east field at Meadowbrook Estate — space for 300 vehicles. Overflow parking at Westfield Community Center with a complimentary shuttle every 15 minutes.";
+        const a = "Free parking is available in the main lot at Iron & Ember Events on Brookshire Pkwy, Carmel. Overflow lots are also on-site. Rideshare drop-off at the main entrance.";
         addVoiceEntry({ question: q, answer: a });
         if (typeof window !== "undefined") {
           const utterance = new SpeechSynthesisUtterance(a);
@@ -202,11 +203,12 @@ Shall I adjust anything? I remember all previous decisions.`;
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center">
-              <Sparkles className="w-3.5 h-3.5 text-white" />
+              <Send className="w-3.5 h-3.5 text-white" />
             </div>
             <span className="text-sm font-bold font-display">Com-Plan-ion</span>
           </Link>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <Link href="/dashboard" className="btn-secondary text-sm">Dashboard</Link>
             <button onClick={reset} className="btn-ghost text-sm">
               <RotateCcw className="w-3.5 h-3.5" />
@@ -219,7 +221,7 @@ Shall I adjust anything? I remember all previous decisions.`;
       <div className="max-w-4xl mx-auto px-6 py-16 space-y-12">
         {/* Hero */}
         <div className="text-center">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-brand-50 text-brand-700 border border-brand-100 mb-6">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-brand-50 text-brand-700 border border-brand-100 dark:bg-brand-900/30 dark:text-brand-400 dark:border-brand-800/50 mb-6">
             <Zap className="w-3.5 h-3.5" />
             Hackathon Demo · IndyHack 2026
           </div>
@@ -279,9 +281,9 @@ Shall I adjust anything? I remember all previous decisions.`;
 
                   {/* Icon */}
                   <div className={`w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center ${
-                    currentStep.id === "complete" ? "bg-emerald-50" : "bg-brand-50"
+                    currentStep.id === "complete" ? "bg-emerald-50 dark:bg-emerald-900/40" : "bg-brand-50 dark:bg-brand-900/40"
                   }`}>
-                    <currentStep.icon className={`w-8 h-8 ${currentStep.id === "complete" ? "text-emerald-600" : "text-brand-600"}`} />
+                    <currentStep.icon className={`w-8 h-8 ${currentStep.id === "complete" ? "text-emerald-600 dark:text-emerald-400" : "text-brand-600 dark:text-brand-400"}`} />
                   </div>
 
                   <h2 className="text-2xl font-bold font-display text-foreground mb-2">{currentStep.title}</h2>
@@ -360,16 +362,16 @@ Shall I adjust anything? I remember all previous decisions.`;
                 <div
                   key={step.id}
                   className={`flex items-center gap-3 p-4 rounded-xl border transition-all ${
-                    isActive ? "border-brand-300 bg-brand-50" : isDone ? "border-emerald-200 bg-emerald-50/50" : "border-border bg-card"
+                    isActive ? "border-brand-300 bg-brand-50 dark:border-brand-700 dark:bg-brand-900/30" : isDone ? "border-emerald-200 bg-emerald-50/50 dark:border-emerald-800 dark:bg-emerald-900/20" : "border-border bg-card"
                   }`}
                 >
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                    isDone ? "bg-emerald-100" : isActive ? "bg-brand-100" : "bg-muted"
+                    isDone ? "bg-emerald-100 dark:bg-emerald-900/60" : isActive ? "bg-brand-100 dark:bg-brand-900/60" : "bg-muted"
                   }`}>
-                    {isDone ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <step.icon className={`w-4 h-4 ${isActive ? "text-brand-600" : "text-muted-foreground"}`} />}
+                    {isDone ? <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> : <step.icon className={`w-4 h-4 ${isActive ? "text-brand-600 dark:text-brand-400" : "text-muted-foreground"}`} />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className={`text-sm font-medium ${isActive ? "text-brand-700" : isDone ? "text-emerald-700" : "text-foreground"}`}>
+                    <div className={`text-sm font-medium ${isActive ? "text-brand-700 dark:text-brand-400" : isDone ? "text-emerald-700 dark:text-emerald-400" : "text-foreground"}`}>
                       {step.title}
                     </div>
                     <div className="text-xs text-muted-foreground truncate">{step.description}</div>

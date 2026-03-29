@@ -84,19 +84,19 @@
   }
 
   .badge-green {
-    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100;
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50;
   }
 
   .badge-amber {
-    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100;
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800/50;
   }
 
   .badge-rose {
-    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-100;
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-100 dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-800/50;
   }
 
   .badge-blue {
-    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-50 text-brand-700 border border-brand-100;
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-50 text-brand-700 border border-brand-100 dark:bg-brand-900/30 dark:text-brand-400 dark:border-brand-800/50;
   }
 
   .btn-primary {
@@ -130,15 +130,15 @@
 
 @layer utilities {
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-600 to-brand-400;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-600 to-brand-400 dark:from-brand-400 dark:to-brand-300;
   }
 
   .text-gradient-warm {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-600 via-brand-600 to-emerald-600;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-600 via-brand-600 to-emerald-600 dark:from-amber-400 dark:via-brand-400 dark:to-emerald-400;
   }
 
   .glass {
-    @apply bg-white/80 backdrop-blur-md border border-white/60;
+    @apply bg-white/80 backdrop-blur-md border border-white/60 dark:bg-gray-900/80 dark:border-white/10;
   }
 
   .glass-dark {
